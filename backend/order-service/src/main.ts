@@ -19,6 +19,12 @@ async function bootstrap() {
       forbidNonWhitelisted: true
     })
   );
+
+  app.enableCors({
+    origin: "*",
+    methods: ["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true
+  })
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {

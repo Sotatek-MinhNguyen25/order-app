@@ -1,22 +1,25 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
 import { OrderService } from "./order.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { GetListDto } from "./dto/get-list.dto";
-import { ApiBody } from "@nestjs/swagger";
-import { CancelOrderDto } from "./dto/cancel-order.dto";
 
 @Controller("/orders")
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   async createOrder(@Body() dto: CreateOrderDto) {
     return await this.orderService.createOrder(dto);
   }
 
-  @Post("/cancel")
-  async cancelOrder(@Body() dto: CancelOrderDto) {
-    return await this.orderService.cancelOrder(dto.orderId);
+  @Put("/:orderId/cancel")
+  async cancelOrder(@Param("orderId") orderId) {
+    return await this.orderService.cancelOrder(orderId);
+  }
+
+  @Post("/:orderId/retry-payment")
+  async retryPayment(@Param("orderId") orderId) {
+    return await this.orderService.retryPayment(orderId);
   }
 
   @Get("")

@@ -15,7 +15,7 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
     @Inject("RABBITMQ_SERVICE") private readonly client: ClientProxy,
     private readonly mailService: MailService
-  ) {}
+  ) { }
 
   async createOrder(dto: CreateOrderDto) {
     const order: OrderEntity = this.orderRepository.create({
@@ -93,6 +93,10 @@ export class OrderService {
     };
   }
 
+  async retryPayment(orderId: string) {
+
+  }
+
   async getOrderById(orderId: string) {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("Order not found");
@@ -109,6 +113,9 @@ export class OrderService {
       query.where("order.productName LIKE :search", {
         search: `%${dto.search}%`
       });
+    }
+    if (dto.status) {
+      query.andWhere("order.status =:status", { status: `${dto.status}` })
     }
 
     query
