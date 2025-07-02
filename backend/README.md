@@ -111,18 +111,6 @@ NODE_ENV=development
 RABBITMQ_URL=amqp://root:password@localhost:5672
 ```
 
-### 3. Chạy với Docker (Khuyến nghị)
-
-```bash
-# Chạy tất cả services
-docker-compose up -d
-
-# Xem logs
-docker-compose logs -f
-
-# Dừng services
-docker-compose down
-```
 
 ### 4. Chạy trong development
 
@@ -259,23 +247,6 @@ npm run lint:fix     # Fix ESLint issues
 npm run format       # Prettier formatting
 ```
 
-## 🐳 Docker Commands
-
-```bash
-# Build images
-docker-compose build
-
-# Rebuild specific service
-docker-compose build order-service
-
-# View logs
-docker-compose logs order-service
-docker-compose logs payment-service
-
-# Execute commands in containers
-docker-compose exec order-service npm run test
-```
-
 ## 📝 Environment Variables
 
 ### Order Service
@@ -324,6 +295,3 @@ docker-compose -f docker-compose.prod.yml up -d
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License.

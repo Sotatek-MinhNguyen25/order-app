@@ -85,7 +85,6 @@ Order Management System
 ### 1. Clone repository
 ```bash
 git clone <repository-url>
-cd order-management-system
 ```
 
 ### 2. Setup Backend
@@ -203,23 +202,6 @@ POST   /api/v1/orders/:id/retry-payment # Thử lại thanh toán
 - Internal microservice communication via RabbitMQ
 - No public API endpoints
 
-## 🐳 Docker Deployment
-
-### Development
-```bash
-cd backend
-docker-compose up -d
-```
-
-### Production
-```bash
-# Build production images
-docker-compose -f docker-compose.prod.yml build
-
-# Deploy
-docker-compose -f docker-compose.prod.yml up -d
-```
-
 ## 📊 Database Schema
 
 ### Orders Table
@@ -238,30 +220,14 @@ CREATE TABLE orders (
 ## 🧪 Testing
 
 ```bash
-# Backend tests
+# Backend tests (basic setup có sẵn)
 cd backend/order-service
 npm run test
 npm run test:e2e
 
-# Frontend tests (if configured)
+# Frontend tests (chưa có setup)
 cd frontend
-npm run test
-```
-
-## 🔍 Monitoring & Debugging
-
-### Health Checks
-- Order Service: `GET http://localhost:8001/health`
-- Payment Service: `GET http://localhost:8002/health`
-
-### Logs
-```bash
-# Docker logs
-docker-compose logs -f order-service
-docker-compose logs -f payment-service
-
-# Application logs
-# Logs are structured JSON in production
+# npm run test (chưa có)
 ```
 
 ## 🚀 Production Deployment
@@ -270,65 +236,34 @@ docker-compose logs -f payment-service
 - Docker & Docker Compose
 - PostgreSQL database
 - RabbitMQ server
-- Domain & SSL certificate
 - Email SMTP service
 
 ### Deployment Steps
 1. **Setup environment variables**
 2. **Build production images**
 3. **Deploy with docker-compose**
-4. **Configure reverse proxy (Nginx)**
-5. **Setup SSL certificate**
-6. **Configure monitoring**
 
-### Nginx Configuration
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    
-    # Frontend
-    location / {
-        root /path/to/frontend/dist;
-        try_files $uri $uri/ /index.html;
-    }
-    
-    # API
-    location /api {
-        proxy_pass http://localhost:8001;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
 
 ## 🔐 Security
 
 ### Backend Security
 - **CORS** configuration
-- **Helmet** for security headers
-- **Rate limiting** (if needed)
 - **Input validation** với class-validator
 - **Error handling** không expose sensitive info
 
 ### Frontend Security
 - **Environment variables** cho config
-- **HTTPS** enforced in production
 - **XSS protection** với React's built-in escaping
 - **Input sanitization**
 
 ## 📈 Performance
 
 ### Backend Optimization
-- **Database indexing** trên các query thường dùng
 - **Connection pooling** cho PostgreSQL
 - **Message queue** cho async processing
-- **Caching** với Redis (có thể thêm)
 
 ### Frontend Optimization
-- **Code splitting** với React.lazy
 - **Bundle optimization** với Vite
-- **Image optimization**
 - **Caching** với React Query
 
 ## 🤝 Contributing
@@ -376,47 +311,3 @@ server {
 - Verify RABBITMQ_URL
 - Check queue configuration
 
-### Support
-- Create GitHub issue for bugs
-- Check documentation first
-- Provide error logs and environment details
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Contact
-
-- **Developer**: [Your Name]
-- **Email**: [your.email@domain.com]
-- **Project Repository**: [GitHub URL]
-
----
-
-## 🎉 Features Roadmap
-
-### Planned Features
-- [ ] **Authentication & Authorization** với JWT
-- [ ] **Real-time updates** với WebSocket
-- [ ] **File upload** cho đơn hàng
-- [ ] **Advanced filtering** và search
-- [ ] **Export data** (PDF, Excel)
-- [ ] **Dashboard analytics** với charts
-- [ ] **Mobile app** với React Native
-- [ ] **Payment gateway** integration (Stripe, PayPal)
-- [ ] **Inventory management**
-- [ ] **Multi-language** support
-
-### Future Enhancements
-- **Redis caching** layer
-- **Event sourcing** pattern
-- **CQRS** implementation
-- **Kubernetes** deployment
-- **Monitoring** với Prometheus/Grafana
-- **CI/CD** pipeline
-- **Load testing** với k6
-- **API versioning**
-
----
-
-**⭐ Nếu project này hữu ích, hãy star repository và chia sẻ với mọi người!**

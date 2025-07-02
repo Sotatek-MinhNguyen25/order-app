@@ -196,11 +196,7 @@ npm run tw:watch     # Watch TailwindCSS changes
 // Base URL từ environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api/v1';
 
-// Request/Response interceptors
-// Authentication headers
-// Error handling
-// Debug logging
-```
+
 
 ### API Endpoints Usage
 ```typescript
@@ -219,108 +215,6 @@ const newOrder = await ordersApi.createOrder({
 });
 ```
 
-## 🎭 State Management
-
-### React Query Setup
-```typescript
-// Global query configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,  // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      retry: 2,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-```
-
-### Custom Hooks
-```typescript
-// useOrders - Quản lý danh sách đơn hàng
-const { data, isLoading, error, refetch } = useOrders(filters);
-
-// useOrderDetail - Chi tiết đơn hàng
-const { order, isLoading, error } = useOrderDetail(orderId);
-```
-
-## 🛡️ Form Validation
-
-### Zod Schemas
-```typescript
-const CreateOrderSchema = z.object({
-  userId: z.string().min(1, 'User ID là bắt buộc'),
-  productName: z.string().min(1, 'Tên sản phẩm là bắt buộc'),
-  amount: z.number().min(0.01, 'Giá trị phải lớn hơn 0'),
-});
-```
-
-### React Hook Form Integration
-```typescript
-const form = useForm<CreateOrderData>({
-  resolver: zodResolver(CreateOrderSchema),
-  defaultValues: {
-    userId: '',
-    productName: '',
-    amount: 0,
-  },
-});
-```
-
-## 🎨 Styling Guide
-
-### TailwindCSS Classes
-```css
-/* Buttons */
-.btn-primary {
-  @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors;
-}
-
-/* Cards */
-.card {
-  @apply bg-white rounded-lg shadow-sm border border-gray-200;
-}
-
-/* Status badges */
-.status-created { @apply bg-blue-100 text-blue-800; }
-.status-confirmed { @apply bg-orange-100 text-orange-800; }
-.status-delivered { @apply bg-green-100 text-green-800; }
-.status-cancelled { @apply bg-red-100 text-red-800; }
-```
-
-## 📱 Responsive Breakpoints
-
-```css
-/* Mobile First */
-sm: 640px    /* Tablet */
-md: 768px    /* Desktop */
-lg: 1024px   /* Large Desktop */
-xl: 1280px   /* Extra Large */
-```
-
-## 🔍 TypeScript Types
-
-### Order Types
-```typescript
-interface Order {
-  id: string;
-  userId: string;
-  productName: string;
-  amount: number;
-  status: OrderStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-enum OrderStatus {
-  CREATED = 'created',
-  CONFIRMED = 'confirmed',
-  DELIVERED = 'delivered',
-  CANCELLED = 'cancelled',
-}
-```
-
 ## 🧪 Testing
 
 ```bash
@@ -331,53 +225,12 @@ npm run test
 npm run test:e2e
 ```
 
-## 🔧 Configuration Files
-
-### Vite Config
-```typescript
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': 'http://localhost:8001'
-    }
-  }
-});
-```
-
-### TailwindCSS Config
-```javascript
-module.exports = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      colors: {
-        primary: colors.blue,
-      }
-    }
-  }
-};
-```
-
 ## 🚀 Deployment
 
 ### Build cho Production
 ```bash
 npm run build
-```
-
-### Deploy với Nginx
-```nginx
-server {
-  listen 80;
-  server_name your-domain.com;
-  
-  location / {
-    root /path/to/dist;
-    try_files $uri $uri/ /index.html;
-  }
-}
+npm run preview
 ```
 
 ### Environment Variables cho Production
@@ -401,7 +254,3 @@ VITE_DEBUG=false
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License.
