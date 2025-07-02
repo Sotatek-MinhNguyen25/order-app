@@ -5,10 +5,13 @@ import { MicroserviceOptions, Transport } from "@nestjs/microservices";
 import { AllExceptionsFilter } from "./exception/all-exceptions.filter";
 import { ValidationPipe } from "@nestjs/common";
 import * as morgan from "morgan";
+import * as dotenv from "dotenv";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const PORT = process.env.PORT ?? 8005;
+
+  dotenv.config();
 
   app.use(morgan("dev"));
   app.setGlobalPrefix("api/v1");
@@ -19,17 +22,19 @@ async function bootstrap() {
       forbidNonWhitelisted: true
     })
   );
+  const rabbitMqUri = process.env.RABBITMQ_URI || "amqp://root:password@localhost:5672";
+  const rabbitMqQueue = process.env.RABBITMQ_QUEUE || "main_queue";
 
   app.enableCors({
     origin: "*",
     methods: ["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true
-  })
+  });
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: ["amqp://root:password@localhost:5672"],
-      queue: "main_queue",
+      urls: [rabbitMqUri],
+      queue: rabbitMqQueue,
       queueOptions: {
         durable: true
       }

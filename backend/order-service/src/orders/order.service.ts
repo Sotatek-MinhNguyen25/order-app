@@ -15,7 +15,7 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
     @Inject("RABBITMQ_SERVICE") private readonly client: ClientProxy,
     private readonly mailService: MailService
-  ) { }
+  ) {}
 
   async createOrder(dto: CreateOrderDto) {
     const order: OrderEntity = this.orderRepository.create({
@@ -93,9 +93,7 @@ export class OrderService {
     };
   }
 
-  async retryPayment(orderId: string) {
-
-  }
+  async retryPayment(orderId: string) {}
 
   async getOrderById(orderId: string) {
     const order = await this.orderRepository.findOneBy({ id: orderId });
@@ -115,7 +113,7 @@ export class OrderService {
       });
     }
     if (dto.status) {
-      query.andWhere("order.status =:status", { status: `${dto.status}` })
+      query.andWhere("order.status =:status", { status: `${dto.status}` });
     }
 
     query
