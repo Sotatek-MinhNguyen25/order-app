@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  order-service:
+    build: ./order-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgres://root:password@host.docker.internal:5432/orders
+      - PAYMENTS_URL=http://payment-service:8002
+
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "8002:8002"
+#  rabbitmq:
+#    image: rabbitmq:3-management
+#    ports:
+#      - "5672:5672"
+#      - "15672:15672" # UI
+#    environment:
+#      RABBITMQ_DEFAULT_USER: root
+#      RABBITMQ_DEFAULT_PASS: password
