@@ -6,8 +6,10 @@ import {
 import { useOrders } from '../hooks/useOrders';
 import { OrderFilters, OrderStatus, SortOrder } from '../types/order';
 import { formatCurrency, formatDate, cn } from '../libs/utils';
+import { useRealtimeOrders } from '@/hooks/useRealtimeOrders';
 
 const OrdersDashboard: React.FC = () => {
+    useRealtimeOrders();
     const [filters, setFilters] = useState<OrderFilters>({
         page: 1,
         limit: 10,

@@ -15,7 +15,7 @@ export class OrderService {
     private readonly orderRepository: Repository<OrderEntity>,
     @Inject("RABBITMQ_SERVICE") private readonly client: ClientProxy,
     private readonly mailService: MailService
-  ) {}
+  ) { }
 
   async createOrder(dto: CreateOrderDto) {
     const order: OrderEntity = this.orderRepository.create({
@@ -32,8 +32,6 @@ export class OrderService {
     });
 
     return {
-      status: 200,
-      message: "Order created successfully",
       data: savedOrder
     };
   }
@@ -87,20 +85,15 @@ export class OrderService {
     );
     await this.orderRepository.save(order);
 
-    return {
-      status: 200,
-      message: "Order cancelled successfully"
-    };
+    return { data: order };
   }
 
-  async retryPayment(orderId: string) {}
+  async retryPayment(orderId: string) { }
 
   async getOrderById(orderId: string) {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("Order not found");
     return {
-      status: 200,
-      message: "Get order detail success",
       data: order
     };
   }
@@ -121,17 +114,15 @@ export class OrderService {
       .skip((dto.page - 1) * dto.limit)
       .take(dto.limit);
     const [orders, total] = await query.getManyAndCount();
-
+    const metadata = {
+      currentPage: dto.page,
+      pageSize: dto.limit,
+      totalItems: total,
+      totalPages: Math.ceil(total / dto.limit)
+    };
     return {
-      status: 200,
-      message: "Get all orders success",
       data: orders,
-      meta: {
-        currentPage: dto.page,
-        pageSize: dto.limit,
-        totalItems: total,
-        totalPages: Math.ceil(total / dto.limit)
-      }
+      meta: metadata
     };
   }
 }

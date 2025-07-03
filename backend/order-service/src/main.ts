@@ -1,15 +1,17 @@
-import { HttpAdapterHost, NestFactory } from "@nestjs/core";
+import { HttpAdapterHost, NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { MicroserviceOptions, Transport } from "@nestjs/microservices";
-import { AllExceptionsFilter } from "./exception/all-exceptions.filter";
+import { AllExceptionsFilter } from "./common/exception/all-exceptions.filter";
 import { ValidationPipe } from "@nestjs/common";
 import * as morgan from "morgan";
 import * as dotenv from "dotenv";
+import { ResponseMessageInterceptor } from "./common/interceptor/response.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const PORT = process.env.PORT ?? 8005;
+  const reflect = app.get(Reflector);
 
   dotenv.config();
 
@@ -22,7 +24,8 @@ async function bootstrap() {
       forbidNonWhitelisted: true
     })
   );
-  const rabbitMqUri = process.env.RABBITMQ_URI || "amqp://root:password@localhost:5672";
+  const rabbitMqUri =
+    process.env.RABBITMQ_URI || "amqp://root:password@localhost:5672";
   const rabbitMqQueue = process.env.RABBITMQ_QUEUE || "main_queue";
 
   app.enableCors({
@@ -50,6 +53,10 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, documentFactory);
 
+  // Interceptor
+  app.useGlobalInterceptors(new ResponseMessageInterceptor(reflect));
+
+  // Exception
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 

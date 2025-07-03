@@ -4,7 +4,7 @@ import { OrderModule } from "./orders/order.module";
 import { DatabaseModule } from "./database/postgres.db";
 import { MailModule } from "./mail/mail.module";
 import { APP_FILTER } from "@nestjs/core";
-import { HttpExceptionFilter } from "./exception/http-exception.filter";
+import { HttpExceptionFilter } from "./common/exception/http-exception.filter";
 
 @Module({
   imports: [
@@ -27,4 +27,4 @@ import { HttpExceptionFilter } from "./exception/http-exception.filter";
     }
   ]
 })
-export class AppModule {}
+export class AppModule { }
