@@ -14,36 +14,14 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/orders" replace />} />
-
           <Route path="/" element={<MainLayout />}>
             <Route path="orders" element={<OrdersDashboard />} />
             <Route path="orders/create" element={<CreateOrder />} />
             <Route path="orders/:id" element={<OrderDetail />} />
           </Route>
-
           <Route path="*" element={<NotFound />} />
         </Routes>
-
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#363636',
-              color: '#fff',
-            },
-            success: {
-              style: {
-                background: '#10b981',
-              },
-            },
-            error: {
-              style: {
-                background: '#ef4444',
-              },
-            },
-          }}
-        />
+        <Toaster position="top-right" />
       </Router>
     </QueryProvider>
   );

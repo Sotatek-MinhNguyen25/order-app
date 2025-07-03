@@ -1,21 +1,19 @@
-// useRealtimeOrders.ts (custom hook)
 import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { socket } from '../libs/socket';
-import { useQueryClient } from 'react-query';
 
 export const useRealtimeOrders = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    useEffect(() => {
-        const listener = (updatedOrder: any) => {
-            console.log('Order updated:', updatedOrder);
-            queryClient.invalidateQueries(['orders']);
-        };
+  useEffect(() => {
+    const handleOrderUpdate = () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    };
 
-        socket.on('order.status.update', listener);
+    socket.on('order.status.update', handleOrderUpdate);
 
-        return () => {
-            socket.off('order.status.update', listener);
-        };
-    }, []);
+    return () => {
+      socket.off('order.status.update', handleOrderUpdate);
+    };
+  }, [queryClient]);
 };
