@@ -26,7 +26,7 @@ async function bootstrap() {
   );
   const rabbitMqUri =
     process.env.RABBITMQ_URI || "amqp://root:password@localhost:5672";
-  const rabbitMqQueue = process.env.RABBITMQ_QUEUE || "main_queue";
+  const rabbitMqQueue = process.env.RABBITMQ_QUEUE || "order_queue";
 
   app.enableCors({
     origin: "*",

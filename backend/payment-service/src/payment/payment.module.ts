@@ -6,11 +6,11 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
   imports: [
     ClientsModule.register([
       {
-        name: 'RABBITMQ_SERVICE',
+        name: 'RABBITMQ_PAYMENT_SERVICE',
         transport: Transport.RMQ,
         options: {
           urls: ['amqp://root:password@localhost:5672'],
-          queue: 'main_queue',
+          queue: 'order_queue',
           queueOptions: { durable: true },
         },
       },
@@ -20,4 +20,4 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
   providers: [],
   exports: [],
 })
-export class PaymentModule {}
+export class PaymentModule { }

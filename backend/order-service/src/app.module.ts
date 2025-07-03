@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { OrderModule } from "./orders/order.module";
 import { DatabaseModule } from "./database/postgres.db";
-import { MailModule } from "./mail/mail.module";
 import { APP_FILTER } from "@nestjs/core";
 import { HttpExceptionFilter } from "./common/exception/http-exception.filter";
 
@@ -14,7 +13,7 @@ import { HttpExceptionFilter } from "./common/exception/http-exception.filter";
 
     // DB
     DatabaseModule,
-    MailModule,
+
 
     // Module
     OrderModule
