@@ -8,12 +8,9 @@ import { OrdersMessageController } from "./order-message.controller";
 import { RabbitMQModule } from "src/base/rabbitmq/rabbitmq.module";
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([OrderEntity]),
-    RabbitMQModule
-  ],
+  imports: [TypeOrmModule.forFeature([OrderEntity]), RabbitMQModule],
   controllers: [OrderController, OrdersMessageController],
   providers: [OrderService],
   exports: [OrderService]
 })
-export class OrderModule { }
+export class OrderModule {}

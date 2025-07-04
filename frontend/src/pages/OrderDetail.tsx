@@ -9,8 +9,9 @@ import {
   RotateCcw,
   X,
   Loader2,
+  Truck,
 } from 'lucide-react';
-import { useOrderDetail, useCancelOrder, useRetryPayment } from '../hooks/useOrderDetail';
+import { useOrderDetail, useRetryPayment, useUpdateOrderStatus } from '../hooks/useOrderDetail';
 import { OrderStatus } from '../types/order';
 import { formatCurrency, formatDate } from '../libs/utils';
 
@@ -18,10 +19,17 @@ const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: order, isPending } = useOrderDetail(id || '');
-  const cancelOrder = useCancelOrder();
   const retryPayment = useRetryPayment();
+  const updateOrderStatus = useUpdateOrderStatus();
 
-  const handleCancel = () => id && cancelOrder.mutate(id);
+  const handleCancel = () => {
+    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.CANCELLED });
+  };
+
+  const handleDeliver = () => {
+    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.DELIVERED });
+  };
+
   const handleRetry = () => id && retryPayment.mutate(id);
 
   if (!id) return <p className="text-red-500">Không tìm thấy mã đơn hàng.</p>;
@@ -50,13 +58,12 @@ const OrderDetail: React.FC = () => {
       <div className="flex-shrink-0">
         <div
           className={`w-4 h-4 rounded-full border-2 flex items-center justify-center
-          ${
-            step.completed
+          ${step.completed
               ? 'bg-green-500 border-green-500'
               : step.active
                 ? 'bg-blue-500 border-blue-500'
                 : 'bg-white border-gray-300'
-          }`}
+            }`}
         >
           {step.completed && <div className="w-2 h-2 bg-white rounded-full" />}
         </div>
@@ -252,13 +259,29 @@ const OrderDetail: React.FC = () => {
                   Thử lại thanh toán
                 </button>
               )}
+
+              {order.status === OrderStatus.CONFIRMED && (
+                <button
+                  onClick={handleDeliver}
+                  className="btn-success w-full"
+                  disabled={updateOrderStatus.isPending}
+                >
+                  {updateOrderStatus.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Truck className="h-4 w-4 mr-2" />
+                  )}
+                  Giao hàng
+                </button>
+              )}
+
               {(order.status === OrderStatus.CREATED || order.status === OrderStatus.CONFIRMED) && (
                 <button
                   onClick={handleCancel}
                   className="btn-danger w-full"
-                  disabled={cancelOrder.isPending}
+                  disabled={updateOrderStatus.isPending}
                 >
-                  {cancelOrder.isPending ? (
+                  {updateOrderStatus.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <X className="h-4 w-4 mr-2" />

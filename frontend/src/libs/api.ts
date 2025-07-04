@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { CreateOrderData, Order, OrdersResponse, OrderFilters } from '../types/order';
+import { CreateOrderData, Order, OrdersResponse, OrderFilters, OrderStatus } from '../types/order';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api/v1';
 
@@ -34,8 +34,8 @@ export const ordersApi = {
     return res.data;
   },
 
-  cancelOrder: async (id: string): Promise<Order> => {
-    const { data } = await api.put(`/orders/${id}/cancel`);
+  updateOrderStatus: async (id: string, status: OrderStatus): Promise<Order> => {
+    const { data } = await api.patch(`/orders/${id}`, { status });
     return data;
   },
 

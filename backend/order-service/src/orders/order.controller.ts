@@ -1,8 +1,19 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query
+} from "@nestjs/common";
 import { OrderService } from "./order.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { GetListDto } from "./dto/get-list.dto";
 import { ResponseMessage } from "src/common/decorators";
+import { OrderStatus } from "./entity/order.enum";
+import { UpdateOrderDto } from "./dto/update-order.dto";
 
 @Controller("/orders")
 export class OrderController {
@@ -14,10 +25,13 @@ export class OrderController {
     return await this.orderService.createOrder(dto);
   }
 
-  @Put("/:orderId/cancel")
-  @ResponseMessage("Cancel order success")
-  async cancelOrder(@Param("orderId") orderId: string) {
-    return await this.orderService.cancelOrder(orderId);
+  @Patch("/:orderId")
+  @ResponseMessage("Update order success")
+  async updateOrder(
+    @Param("orderId") orderId: string,
+    @Body() dto: UpdateOrderDto
+  ) {
+    return await this.orderService.updateOrder(orderId, dto.status);
   }
 
   @Post("/:orderId/retry-payment")

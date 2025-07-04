@@ -17,9 +17,10 @@ export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
-    @Inject("RABBITMQ_PAYMENT_SERVICE") private readonly clientOrder: ClientProxy,
+    @Inject("RABBITMQ_PAYMENT_SERVICE")
+    private readonly clientOrder: ClientProxy,
     @Inject("RABBITMQ_MAIL_SERVICE") private readonly clientMail: ClientProxy
-  ) { }
+  ) {}
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
     const order: OrderEntity = this.orderRepository.create({
@@ -62,40 +63,39 @@ export class OrderService {
       }
     });
     await this.orderRepository.save(order);
-    if (order.status === OrderStatus.CONFIRMED) {
-      setTimeout(async () => {
-        const confirmedOrder = await this.orderRepository.findOneBy({
-          id: order.id
-        });
-        if (confirmedOrder && confirmedOrder.status === OrderStatus.CONFIRMED) {
-          confirmedOrder.status = OrderStatus.DELIVERED;
-          await this.orderRepository.save(confirmedOrder);
-
-          this.clientMail.emit("order.send.mail", {
-            to: "nguyenquangminh15092003@gmail.com",
-            order: {
-              id: confirmedOrder.id,
-              productName: confirmedOrder.productName,
-              amount: confirmedOrder.amount,
-              status: confirmedOrder.status
-            }
-          });
-        }
-      }, 30000);
-    }
   }
 
-  async cancelOrder(orderId: string): Promise<OrderResponse> {
+  async updateOrder(
+    orderId: string,
+    status: OrderStatus
+  ): Promise<OrderResponse> {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("Order not found");
+    const currentStatus = order.status;
+
     if (
-      order.status !== OrderStatus.CONFIRMED &&
-      order.status !== OrderStatus.CREATED
+      currentStatus === OrderStatus.CANCELLED ||
+      currentStatus === OrderStatus.DELIVERED
+    )
+      throw new BadRequestException(
+        `Cannot update order in status '${currentStatus}'`
+      );
+
+    if (
+      status === OrderStatus.CANCELLED &&
+      currentStatus !== OrderStatus.CREATED &&
+      currentStatus !== OrderStatus.CONFIRMED
     ) {
       throw new BadRequestException("Order cannot be cancelled");
     }
 
-    order.status = OrderStatus.CANCELLED;
+    if (
+      status === OrderStatus.DELIVERED &&
+      currentStatus !== OrderStatus.CONFIRMED
+    )
+      throw new BadRequestException("Order cannot delivered");
+
+    order.status = status;
     this.clientMail.emit("order.send.mail", {
       to: "nguyenquangminh15092003@gmail.com",
       order: {
@@ -110,7 +110,7 @@ export class OrderService {
     return { data: order };
   }
 
-  async retryPayment(orderId: string) { }
+  async retryPayment(orderId: string) {}
 
   async getOrderById(orderId: string): Promise<OrderResponse> {
     const order = await this.orderRepository.findOneBy({ id: orderId });

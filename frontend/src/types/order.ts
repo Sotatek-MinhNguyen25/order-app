@@ -37,6 +37,11 @@ export interface CreateOrderData {
   amount: number;
 }
 
+// Dữ liệu cập nhật trạng thái đơn hàng
+export interface UpdateOrderDto {
+  status: OrderStatus;
+}
+
 // Bộ lọc danh sách đơn hàng
 export interface OrderFilters {
   search?: string;
