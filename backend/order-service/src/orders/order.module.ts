@@ -5,31 +5,12 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { OrderEntity } from "./entity/order.entity";
 import { ClientsModule, Transport } from "@nestjs/microservices";
 import { OrdersMessageController } from "./order-message.controller";
+import { RabbitMQModule } from "src/base/rabbitmq/rabbitmq.module";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OrderEntity]),
-    ClientsModule.register([
-      {
-        name: "RABBITMQ_ORDER_SERVICE",
-        transport: Transport.RMQ,
-        options: {
-          urls: ["amqp://root:password@localhost:5672"],
-          queue: "payment_queue",
-          queueOptions: { durable: true },
-        },
-      },
-      {
-        name: "RABBITMQ_MAIL_SERVICE",
-        transport: Transport.RMQ,
-        options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://root:password@localhost:5672'],
-          queue: "mail_queue",
-          queueOptions: { durable: true },
-        },
-      },
-    ]),
-
+    RabbitMQModule
   ],
   controllers: [OrderController, OrdersMessageController],
   providers: [OrderService],

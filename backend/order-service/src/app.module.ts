@@ -4,6 +4,7 @@ import { OrderModule } from "./orders/order.module";
 import { DatabaseModule } from "./database/postgres.db";
 import { APP_FILTER } from "@nestjs/core";
 import { HttpExceptionFilter } from "./common/exception/http-exception.filter";
+import { RabbitMQModule } from "./base/rabbitmq/rabbitmq.module";
 
 @Module({
   imports: [
@@ -11,9 +12,11 @@ import { HttpExceptionFilter } from "./common/exception/http-exception.filter";
       isGlobal: true
     }),
 
+    // Base
+    RabbitMQModule,
+
     // DB
     DatabaseModule,
-
 
     // Module
     OrderModule

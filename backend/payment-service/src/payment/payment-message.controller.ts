@@ -5,8 +5,8 @@ import { PaymentRequestDto } from './dto/payment-request.dto';
 @Controller()
 export class PaymentsMessageController {
   constructor(
-    @Inject('RABBITMQ_PAYMENT_SERVICE') private readonly client: ClientProxy,
-  ) { }
+    @Inject('RABBITMQ_ORDER_SERVICE') private readonly client: ClientProxy,
+  ) {}
 
   @EventPattern('order.created')
   async handleOrder(@Payload() data: PaymentRequestDto) {

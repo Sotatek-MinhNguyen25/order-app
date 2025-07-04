@@ -1,4 +1,3 @@
-// orders.gateway.ts
 import {
   WebSocketGateway,
   WebSocketServer,

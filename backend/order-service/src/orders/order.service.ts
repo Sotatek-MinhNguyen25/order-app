@@ -17,8 +17,8 @@ export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
-    @Inject("RABBITMQ_ORDER_SERVICE") private readonly clientOrder: ClientProxy,
-    @Inject("RABBITMQ_MAIL_SERVICE") private readonly clientMail: ClientProxy,
+    @Inject("RABBITMQ_PAYMENT_SERVICE") private readonly clientOrder: ClientProxy,
+    @Inject("RABBITMQ_MAIL_SERVICE") private readonly clientMail: ClientProxy
   ) { }
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
@@ -60,7 +60,7 @@ export class OrderService {
         amount: order.amount,
         status: order.status
       }
-    })
+    });
     await this.orderRepository.save(order);
     if (order.status === OrderStatus.CONFIRMED) {
       setTimeout(async () => {
@@ -79,7 +79,7 @@ export class OrderService {
               amount: confirmedOrder.amount,
               status: confirmedOrder.status
             }
-          })
+          });
         }
       }, 30000);
     }
@@ -104,7 +104,7 @@ export class OrderService {
         amount: order.amount,
         status: order.status
       }
-    })
+    });
     await this.orderRepository.save(order);
 
     return { data: order };
