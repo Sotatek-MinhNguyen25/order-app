@@ -1,19 +1,24 @@
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 import * as morgan from 'morgan';
 import * as dotenv from 'dotenv';
+import { NOTIFICATION_CONSTANTS } from './constants';
+import { notificationConfig } from './config';
 
 async function bootstrap() {
+  dotenv.config();
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+
   const PORT = process.env.PORT ?? 8003;
 
-  dotenv.config();
-
   app.use(morgan('dev'));
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix(NOTIFICATION_CONSTANTS.API_PREFIX);
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -21,15 +26,10 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  const rabbitMqUri =
-    process.env.RABBITMQ_URI || 'amqp://root:password@localhost:5672';
-  const rabbitMqQueue = process.env.RABBITMQ_QUEUE || 'mail_queue';
 
-  app.enableCors({
-    origin: '*',
-    methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    credentials: true,
-  });
+  const rabbitMqUri = notificationConfig.rabbitmqUrl;
+  const rabbitMqQueue = notificationConfig.rabbitmqMailQueue;
+
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
@@ -41,8 +41,12 @@ async function bootstrap() {
     },
   });
 
+  app.enableCors(notificationConfig.corsOptions);
+
   await app.startAllMicroservices();
   await app.listen(PORT);
-  console.log('Application is running on port::' + PORT);
+
+  logger.log(`🚀 Application is running on http://localhost:${PORT}`);
+  logger.log(`📬 Connected to RabbitMQ queue: ${rabbitMqQueue}`);
 }
 bootstrap();

@@ -1,21 +1,29 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller, Inject, Logger } from '@nestjs/common';
 import { EventPattern, Payload, ClientProxy } from '@nestjs/microservices';
 import { PaymentRequestDto } from './dto/payment-request.dto';
+import { PAYMENT_CONSTANTS } from 'src/constants';
+import { PaymentStatus } from './payment-status.enum';
 
 @Controller()
 export class PaymentsMessageController {
+  private readonly logger = new Logger(PaymentsMessageController.name);
+
   constructor(
-    @Inject('RABBITMQ_ORDER_SERVICE') private readonly client: ClientProxy,
-  ) {}
+    @Inject(PAYMENT_CONSTANTS.SERVICES.RABBITMQ_ORDER_SERVICE)
+    private readonly client: ClientProxy,
+  ) { }
 
-  @EventPattern('order.created')
+  @EventPattern(PAYMENT_CONSTANTS.EVENTS.ORDER_CREATED)
   async handleOrder(@Payload() data: PaymentRequestDto) {
-    console.log(data);
-    const isConfirmed: boolean = Math.random() > 0.5;
+    this.logger.log(`📥 Received order for payment: ${JSON.stringify(data)}`);
 
-    this.client.emit('order.payment.result', {
+    const isConfirmed: boolean = Math.random() > 0.5;
+    const result = {
       orderId: data.orderId,
-      status: isConfirmed ? 'confirmed' : 'declined',
-    });
+      status: isConfirmed ? PaymentStatus.CONFIRMED : PaymentStatus.DECLINED,
+    };
+
+    this.logger.log(`💸 Payment ${result.status} for order ${result.orderId}`);
+    this.client.emit(PAYMENT_CONSTANTS.EVENTS.ORDER_PAYMENT_RESULT, result);
   }
 }

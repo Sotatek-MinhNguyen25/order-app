@@ -8,22 +8,24 @@ import { SmtpMailService } from './smtp-mail.service';
 import { IMailServiceToken } from './mail.constants';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MailController } from './mail.controller';
+import { notificationConfig } from 'src/config';
 
 @Module({
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: process.env.MAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.MAIL_PORT || '465'),
+        host: notificationConfig.smtpHost,
+        port: notificationConfig.smtpPort,
         secure: true,
         auth: {
-          user: process.env.MAIL_USER || 'nguyenquangminhbkimbang@gmail.com',
-          pass: process.env.MAIL_PASS || 'ckaugcpovjplmfch',
+          user: notificationConfig.smtpUser,
+          pass: notificationConfig.smtpPassword,
         },
       },
       defaults: {
-        from: `"Order App"`,
+        from: `"${notificationConfig.smtpFromName}" <${notificationConfig.smtpFromEmail}>`,
       },
+
       template: {
         dir: join(__dirname, './templates'),
         adapter: new HandlebarsAdapter(),
@@ -43,4 +45,4 @@ import { MailController } from './mail.controller';
   ],
   exports: [MailService],
 })
-export class MailModule { }
+export class MailModule {}

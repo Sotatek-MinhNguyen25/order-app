@@ -9,4 +9,4 @@ import { RabbitMQModule } from 'src/base/rabbitmq/rabbitmq.module';
   providers: [],
   exports: [],
 })
-export class PaymentModule {}
+export class PaymentModule { }

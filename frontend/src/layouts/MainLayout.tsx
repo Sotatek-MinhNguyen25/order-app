@@ -15,24 +15,25 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
+      <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <Package className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-semibold text-gray-900">Order Management</span>
+              <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Package className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-gray-900">Order Management</span>
             </div>
 
             {/* Navigation */}
-            <nav className="flex space-x-8">
+            <nav className="flex space-x-2">
               <Link
                 to="/orders"
-                className={`inline-flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive('/orders')
-                    ? 'bg-blue-100 text-blue-700'
+                className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/orders')
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
@@ -40,11 +41,10 @@ const MainLayout: React.FC = () => {
 
               <Link
                 to="/orders/create"
-                className={`inline-flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isCreateActive()
-                    ? 'bg-blue-100 text-blue-700'
+                className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isCreateActive()
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 <Plus className="h-4 w-4" />
                 <span>Tạo đơn hàng</span>
@@ -52,28 +52,32 @@ const MainLayout: React.FC = () => {
             </nav>
 
             {/* Connection Status */}
-            <div className="flex items-center space-x-2">
-              {isConnected ? (
-                <Wifi className="h-4 w-4 text-green-600" />
-              ) : (
-                <WifiOff className="h-4 w-4 text-red-600" />
-              )}
-              <span
-                className={`text-sm font-medium ${isConnected ? 'text-green-600' : 'text-red-600'}`}
-              >
-                {isConnected ? 'Đã kết nối' : 'Mất kết nối'}
-              </span>
-              <div
-                className={`w-2 h-2 rounded-full animate-pulse ${
-                  isConnected ? 'bg-green-500' : 'bg-red-500'
-                }`}
-              />
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  {isConnected ? (
+                    <Wifi className="h-4 w-4 text-emerald-600" />
+                  ) : (
+                    <WifiOff className="h-4 w-4 text-red-600" />
+                  )}
+                  <div
+                    className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'
+                      }`}
+                  />
+                </div>
+                <span
+                  className={`text-sm font-medium ${isConnected ? 'text-emerald-600' : 'text-red-600'
+                    }`}
+                >
+                  {isConnected ? 'Online' : 'Offline'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <Outlet />
       </main>
     </div>
@@ -81,3 +85,4 @@ const MainLayout: React.FC = () => {
 };
 
 export default MainLayout;
+

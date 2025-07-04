@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { PaymentModule } from './payment/payment.module';
 import { RabbitMQModule } from './base/rabbitmq/rabbitmq.module';
+import { ConfigModule } from './config/config.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    // Global
+    ConfigModule,
 
     RabbitMQModule,
     PaymentModule,
@@ -15,4 +14,4 @@ import { RabbitMQModule } from './base/rabbitmq/rabbitmq.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

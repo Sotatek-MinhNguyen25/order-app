@@ -34,12 +34,6 @@ export class OrderController {
     return await this.orderService.updateOrder(orderId, dto.status);
   }
 
-  @Post("/:orderId/retry-payment")
-  @ResponseMessage("Retry payment success")
-  async retryPayment(@Param("orderId") orderId: string) {
-    return await this.orderService.retryPayment(orderId);
-  }
-
   @Get("")
   @ResponseMessage("Get list order success")
   async getAllOrders(@Query() dto: GetListDto) {

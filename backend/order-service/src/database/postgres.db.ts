@@ -1,16 +1,17 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { OrderEntity } from "../orders/entity/order.entity";
+import { orderConfig } from "src/config";
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: "postgres",
-      host: process.env.DB_HOST || "localhost",
-      port: parseInt(process.env.DB_PORT || "5432"),
-      username: process.env.DB_USER || "postgres",
-      password: process.env.DB_PASSWORD || "password",
-      database: process.env.DB_NAME || "order_service",
+      host: orderConfig.DB_HOST,
+      port: orderConfig.DB_PORT,
+      username: orderConfig.DB_USER,
+      password: orderConfig.DB_PASSWORD,
+      database: orderConfig.DB_NAME,
       synchronize: true,
       entities: [OrderEntity]
     })

@@ -6,18 +6,51 @@ services:
     ports:
       - "8001:8001"
     environment:
+      - PORT=8001
       - DATABASE_URL=postgres://root:password@host.docker.internal:5432/orders
-      - PAYMENTS_URL=http://payment-service:8002
+      - PAYMENT_SERVICE_URL=http://payment-service:8002
+      - RABBITMQ_URL=amqp://root:password@rabbitmq:5672
+      - RABBITMQ_PAYMENT_QUEUE=payment_queue
+      - RABBITMQ_MAIL_QUEUE=mail_queue
+      - DEFAULT_EMAIL_RECIPIENT=nguyenquangminh15092003@gmail.com
+      - DEFAULT_PAYMENT_TOKEN=secure_payment_token
+    depends_on:
+      - rabbitmq
 
   payment-service:
     build: ./payment-service
     ports:
       - "8002:8002"
-#  rabbitmq:
-#    image: rabbitmq:3-management
-#    ports:
-#      - "5672:5672"
-#      - "15672:15672" # UI
-#    environment:
-#      RABBITMQ_DEFAULT_USER: root
-#      RABBITMQ_DEFAULT_PASS: password
+    environment:
+      - PORT=8002
+      - RABBITMQ_URL=amqp://root:password@rabbitmq:5672
+      - RABBITMQ_PAYMENT_QUEUE=payment_queue
+      - RABBITMQ_ORDER_QUEUE=order_queue
+    depends_on:
+      - rabbitmq
+
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+      - RABBITMQ_URL=amqp://root:password@rabbitmq:5672
+      - RABBITMQ_MAIL_QUEUE=mail_queue
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_EMAIL=noreply@orderservice.com
+      - SMTP_FROM_NAME=Order Service
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672" # UI
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: password

@@ -11,15 +11,17 @@ import {
   OrderResponse,
   PaginatedOrderResponse
 } from "./dto/order-response.dto";
+import { ORDER_CONSTANTS } from "src/constants";
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
-    @Inject("RABBITMQ_PAYMENT_SERVICE")
+    @Inject(ORDER_CONSTANTS.RABBITMQ_PAYMENT_SERVICE)
     private readonly clientOrder: ClientProxy,
-    @Inject("RABBITMQ_MAIL_SERVICE") private readonly clientMail: ClientProxy
+    @Inject(ORDER_CONSTANTS.RABBITMQ_MAIL_SERVICE)
+    private readonly clientMail: ClientProxy
   ) {}
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
@@ -29,11 +31,12 @@ export class OrderService {
     });
 
     const savedOrder: OrderEntity = await this.orderRepository.save(order);
-    this.clientOrder.emit("order.created", {
+
+    this.clientOrder.emit(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
       orderId: savedOrder.id,
       amount: savedOrder.amount,
       userId: savedOrder.userId,
-      token: "my_token"
+      token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
     });
 
     return {
@@ -53,8 +56,10 @@ export class OrderService {
       data.status === "confirmed"
         ? OrderStatus.CONFIRMED
         : OrderStatus.CANCELLED;
-    this.clientMail.emit("order.send.mail", {
-      to: "nguyenquangminh15092003@gmail.com",
+    await this.orderRepository.save(order);
+
+    this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
+      to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
       order: {
         id: order.id,
         productName: order.productName,
@@ -62,7 +67,6 @@ export class OrderService {
         status: order.status
       }
     });
-    await this.orderRepository.save(order);
   }
 
   async updateOrder(
@@ -96,8 +100,10 @@ export class OrderService {
       throw new BadRequestException("Order cannot delivered");
 
     order.status = status;
-    this.clientMail.emit("order.send.mail", {
-      to: "nguyenquangminh15092003@gmail.com",
+    await this.orderRepository.save(order);
+
+    this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
+      to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
       order: {
         id: order.id,
         productName: order.productName,
@@ -105,12 +111,9 @@ export class OrderService {
         status: order.status
       }
     });
-    await this.orderRepository.save(order);
 
     return { data: order };
   }
-
-  async retryPayment(orderId: string) {}
 
   async getOrderById(orderId: string): Promise<OrderResponse> {
     const order = await this.orderRepository.findOneBy({ id: orderId });

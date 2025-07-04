@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { OrderModule } from "./orders/order.module";
 import { DatabaseModule } from "./database/postgres.db";
 import { APP_FILTER } from "@nestjs/core";
@@ -8,9 +8,8 @@ import { RabbitMQModule } from "./base/rabbitmq/rabbitmq.module";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true
-    }),
+    // Global
+    ConfigModule,
 
     // Base
     RabbitMQModule,

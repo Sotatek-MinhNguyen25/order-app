@@ -1,32 +1,31 @@
 import { Module } from "@nestjs/common";
 import { ClientsModule, Transport } from "@nestjs/microservices";
+import { orderConfig } from "src/config";
+import { ORDER_CONSTANTS } from "src/constants";
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: "RABBITMQ_PAYMENT_SERVICE",
+        name: ORDER_CONSTANTS.RABBITMQ_PAYMENT_SERVICE,
         transport: Transport.RMQ,
         options: {
-          urls: ["amqp://root:password@localhost:5672"],
-          queue: "payment_queue",
+          urls: [orderConfig.RABBITMQ_URI],
+          queue: orderConfig.RABBITMQ_PAYMENT_QUEUE,
           queueOptions: { durable: true }
         }
       },
       {
-        name: "RABBITMQ_MAIL_SERVICE",
+        name: ORDER_CONSTANTS.RABBITMQ_MAIL_SERVICE,
         transport: Transport.RMQ,
         options: {
-          urls: [
-            process.env.RABBITMQ_URL || "amqp://root:password@localhost:5672"
-          ],
-          queue: "mail_queue",
+          urls: [orderConfig.RABBITMQ_URI],
+          queue: orderConfig.RABBITMQ_MAIL_QUEUE,
           queueOptions: { durable: true }
         }
       }
     ])
   ],
-  providers: [],
   exports: [ClientsModule]
 })
 export class RabbitMQModule {}

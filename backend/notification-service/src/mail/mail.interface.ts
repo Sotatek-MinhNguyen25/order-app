@@ -1,4 +1,3 @@
-
 export interface IMailService {
   sendOrderStatusMail(
     to: string,

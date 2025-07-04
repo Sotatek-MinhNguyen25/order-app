@@ -2,9 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Package, Loader2 } from 'lucide-react';
+import { ArrowLeft, Package, Loader2, User, DollarSign, ShoppingCart } from 'lucide-react';
 import { useCreateOrder } from '../hooks/useOrders';
 import { createOrderSchema, CreateOrderFormData } from '../libs/validation';
+import { InputField } from '../components/InputField';
 
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
@@ -26,68 +27,77 @@ const CreateOrder: React.FC = () => {
     navigate('/orders');
   };
 
-  const renderField = (
-    name: keyof CreateOrderFormData,
-    label: string,
-    type: string,
-    placeholder = ''
-  ) => (
-    <div>
-      <label className="label">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      <input
-        {...register(name, name === 'amount' ? { valueAsNumber: true } : {})}
-        type={type}
-        placeholder={placeholder}
-        className={`input ${errors[name] ? 'border-red-300 focus:ring-red-500' : ''}`}
-        disabled={isSubmitting}
-      />
-      {errors[name] && <p className="error-text">{errors[name]?.message}</p>}
-    </div>
-  );
-
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-md">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tạo đơn hàng mới</h1>
-          <p className="text-gray-600">Điền thông tin để tạo đơn hàng</p>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-emerald-600 to-green-600 rounded-xl p-6 text-white">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Tạo đơn hàng mới</h1>
+            <p className="text-emerald-100">Điền thông tin để tạo đơn hàng của bạn</p>
+          </div>
         </div>
       </div>
 
-      <div className="card p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {renderField(
-            'userId',
-            'Mã người dùng (UUID)',
-            'text',
-            '550e8400-e29b-41d4-a716-446655440000'
-          )}
-          {renderField('productName', 'Tên sản phẩm', 'text', 'Nhập tên sản phẩm...')}
-          {renderField('amount', 'Số tiền (VND)', 'number')}
+      {/* Form */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
+          <InputField
+            label="Mã người dùng (UUID)"
+            icon={<User className="h-4 w-4" />}
+            placeholder="550e8400-e29b-41d4-a716-446655440000"
+            register={register('userId')}
+            error={errors.userId}
+            disabled={isSubmitting}
+          />
+          <InputField
+            label="Tên sản phẩm"
+            icon={<Package className="h-4 w-4" />}
+            placeholder="Nhập tên sản phẩm..."
+            register={register('productName')}
+            error={errors.productName}
+            disabled={isSubmitting}
+          />
+          <InputField
+            label="Số tiền (VND)"
+            icon={<DollarSign className="h-4 w-4" />}
+            type="number"
+            min={0}
+            step={1000}
+            placeholder="0"
+            register={register('amount', { valueAsNumber: true })}
+            error={errors.amount}
+            disabled={isSubmitting}
+          />
 
-          <div className="flex justify-end gap-4 pt-6 border-t">
+          <div className="flex justify-end gap-4 pt-6 border-t border-gray-100">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="btn-secondary"
+              className="px-6 py-3 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
               disabled={isSubmitting}
             >
               Hủy
             </button>
-            <button type="submit" className="btn-primary" disabled={isSubmitting}>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                   Đang tạo...
                 </>
               ) : (
                 <>
-                  <Package className="h-4 w-4 mr-2" />
+                  <ShoppingCart className="h-4 w-4" />
                   Tạo đơn hàng
                 </>
               )}
@@ -96,13 +106,22 @@ const CreateOrder: React.FC = () => {
         </form>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-        <h3 className="text-sm font-medium text-blue-800 mb-2">Lưu ý:</h3>
-        <ul className="text-sm text-blue-700 list-disc list-inside space-y-1">
-          <li>Mã người dùng phải là UUID hợp lệ</li>
-          <li>Tên sản phẩm không được để trống</li>
-          <li>Số tiền phải lớn hơn hoặc bằng 0</li>
-        </ul>
+      {/* Info Card */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Package className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-blue-900 mb-2">Hướng dẫn tạo đơn hàng</h3>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Mã người dùng phải là UUID hợp lệ</li>
+              <li>• Tên sản phẩm không được để trống</li>
+              <li>• Số tiền phải lớn hơn hoặc bằng 0</li>
+              <li>• Đơn hàng sẽ được xử lý tự động sau khi tạo</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
