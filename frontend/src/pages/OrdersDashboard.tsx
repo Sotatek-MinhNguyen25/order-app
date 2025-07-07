@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Search, Package, RefreshCw } from 'lucide-react';
 import { useOrders } from '../hooks/useOrders';
+import { useRealtimeOrders } from '../hooks/useRealtimeOrders';
 import { OrderFilters, OrderStatus, SortOrder } from '../types/order';
 import { formatCurrency, formatDate } from '../libs/utils';
 
@@ -14,6 +15,9 @@ const OrdersDashboard: React.FC = () => {
   });
 
   const { data: ordersResponse, isPending, error, refetch } = useOrders(filters);
+
+  // Enable real-time updates
+  useRealtimeOrders();
 
   const handleSearchChange = (search: string) => {
     setFilters(prev => ({ ...prev, search, page: 1 }));
@@ -239,7 +243,7 @@ const OrdersDashboard: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{order.productName}</h3>
-                      <p className="text-sm text-gray-600">ID: #{order.id.slice(0, 8)}</p>
+
                     </div>
                   </div>
                   <div className="flex items-center space-x-6">
@@ -288,8 +292,8 @@ const OrdersDashboard: React.FC = () => {
                   <button
                     key={page}
                     className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${page === ordersResponse.meta.currentPage
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                       }`}
                     onClick={() => handlePageChange(page)}
                   >

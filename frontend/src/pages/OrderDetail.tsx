@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -18,16 +18,26 @@ import { formatCurrency, formatDate } from '../libs/utils';
 const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: order, isPending } = useOrderDetail(id || '');
+  const { data: order, isPending, refetch } = useOrderDetail(id || '');
   const retryPayment = useRetryPayment();
   const updateOrderStatus = useUpdateOrderStatus();
 
+  useEffect(() => {
+    if (id) {
+      refetch();
+    }
+  }, [id, refetch]);
+
   const handleCancel = () => {
-    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.CANCELLED });
+    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.CANCELLED }, {
+      onSuccess: () => navigate('/orders'),
+    });
   };
 
   const handleDeliver = () => {
-    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.DELIVERED });
+    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.DELIVERED }, {
+      onSuccess: () => navigate('/orders'),
+    });
   };
 
   const handleRetry = () => id && retryPayment.mutate(id);
@@ -173,7 +183,7 @@ const OrderDetail: React.FC = () => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Chi tiết đơn hàng #{order.id.slice(0, 8)}
+            Chi tiết đơn hàng
           </h1>
           <p className="text-gray-600">Thông tin chi tiết và tiến trình đơn hàng</p>
         </div>
@@ -195,11 +205,6 @@ const OrderDetail: React.FC = () => {
                 <DollarSign className="h-5 w-5 text-gray-400" />,
                 'Số tiền',
                 formatCurrency(order.amount)
-              )}
-              {renderInfoItem(
-                <User className="h-5 w-5 text-gray-400" />,
-                'Mã người dùng',
-                order.userId
               )}
               {renderInfoItem(
                 <Calendar className="h-5 w-5 text-gray-400" />,

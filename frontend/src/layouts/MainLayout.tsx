@@ -1,17 +1,19 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Package, Plus, Home, Wifi, WifiOff } from 'lucide-react';
+import { Package, Home } from 'lucide-react';
+import { WebSocketStatus } from '../components';
+import { useConnection } from '../hooks';
 
 const MainLayout: React.FC = () => {
   const location = useLocation();
-  const isConnected = true; // TODO: Replace with WebSocket status
+
+  // Enable connection notifications
+  useConnection();
 
   const isActive = (path: string) => {
     if (path === '/orders' && location.pathname === '/orders') return true;
     return location.pathname.startsWith(path) && location.pathname !== '/orders/create';
   };
-
-  const isCreateActive = () => location.pathname === '/orders/create';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,46 +33,20 @@ const MainLayout: React.FC = () => {
               <Link
                 to="/orders"
                 className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/orders')
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
               >
                 <Home className="h-4 w-4" />
                 <span>Dashboard</span>
               </Link>
 
-              <Link
-                to="/orders/create"
-                className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isCreateActive()
-                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/25'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-              >
-                <Plus className="h-4 w-4" />
-                <span>Tạo đơn hàng</span>
-              </Link>
             </nav>
 
             {/* Connection Status */}
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <div className="relative">
-                  {isConnected ? (
-                    <Wifi className="h-4 w-4 text-emerald-600" />
-                  ) : (
-                    <WifiOff className="h-4 w-4 text-red-600" />
-                  )}
-                  <div
-                    className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'
-                      }`}
-                  />
-                </div>
-                <span
-                  className={`text-sm font-medium ${isConnected ? 'text-emerald-600' : 'text-red-600'
-                    }`}
-                >
-                  {isConnected ? 'Online' : 'Offline'}
-                </span>
+            <div className="flex items-center space-x-4">
+              <div className="px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-lg border border-gray-200/50 shadow-sm">
+                <WebSocketStatus />
               </div>
             </div>
           </div>

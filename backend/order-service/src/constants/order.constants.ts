@@ -29,5 +29,11 @@ export const ORDER_CONSTANTS = {
     ORDER_CREATED: "order.created",
     ORDER_SEND_MAIL: "order.send.mail",
     ORDER_PAYMENT_RESULT: "order.payment.result"
+  },
+
+  // WebSocket Events
+  WEBSOCKET_EVENTS: {
+    ORDER_CREATED: "orderCreated",
+    ORDER_UPDATED: "orderUpdated"
   }
 } as const;

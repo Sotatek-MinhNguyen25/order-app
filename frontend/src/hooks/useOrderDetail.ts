@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ordersApi } from '../libs/api';
+import { QUERY_KEYS, TOAST_MESSAGES } from '../constants';
 import toast from 'react-hot-toast';
 import { Order, OrderStatus } from '../types/order';
 
 export const useOrderDetail = (id: string) => {
   return useQuery({
-    queryKey: ['order', id],
+    queryKey: QUERY_KEYS.ORDER_DETAIL(id),
     queryFn: () => ordersApi.getOrderById(id),
     enabled: Boolean(id),
+    staleTime: 5 * 1000
   });
 };
 
@@ -19,16 +21,16 @@ export const useUpdateOrderStatus = () => {
       ordersApi.updateOrderStatus(id, status),
     onSuccess: (updatedOrder: Order) => {
       const statusMessages = {
-        [OrderStatus.CANCELLED]: 'Hủy đơn hàng thành công',
-        [OrderStatus.DELIVERED]: 'Giao hàng thành công',
-        [OrderStatus.CONFIRMED]: 'Xác nhận đơn hàng thành công',
-        [OrderStatus.CREATED]: 'Tạo đơn hàng thành công',
+        [OrderStatus.CANCELLED]: TOAST_MESSAGES.ORDER_STATUS.CANCELLED,
+        [OrderStatus.DELIVERED]: TOAST_MESSAGES.ORDER_STATUS.DELIVERED,
+        [OrderStatus.CONFIRMED]: TOAST_MESSAGES.ORDER_STATUS.CONFIRMED,
+        [OrderStatus.CREATED]: TOAST_MESSAGES.ORDER_STATUS.CREATED,
       };
-      toast.success(statusMessages[updatedOrder.status] || 'Cập nhật trạng thái thành công');
-      queryClient.setQueryData(['order', updatedOrder.id], updatedOrder);
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast.success(statusMessages[updatedOrder.status] || TOAST_MESSAGES.STATUS_UPDATE_SUCCESS);
+      queryClient.setQueryData(QUERY_KEYS.ORDER_DETAIL(updatedOrder.id), updatedOrder);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
     },
-    onError: () => toast.error('Có lỗi khi cập nhật trạng thái đơn hàng'),
+    onError: () => toast.error(TOAST_MESSAGES.ORDER_UPDATE_ERROR),
   });
 };
 
@@ -38,10 +40,10 @@ export const useRetryPayment = () => {
   return useMutation({
     mutationFn: ordersApi.retryPayment,
     onSuccess: (updatedOrder: Order) => {
-      toast.success('Thử lại thanh toán thành công');
-      queryClient.setQueryData(['order', updatedOrder.id], updatedOrder);
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      toast.success(TOAST_MESSAGES.RETRY_PAYMENT_SUCCESS);
+      queryClient.setQueryData(QUERY_KEYS.ORDER_DETAIL(updatedOrder.id), updatedOrder);
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
     },
-    onError: () => toast.error('Có lỗi khi thử lại thanh toán'),
+    onError: () => toast.error(TOAST_MESSAGES.RETRY_PAYMENT_ERROR),
   });
 };

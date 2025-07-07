@@ -12,6 +12,7 @@ import {
   PaginatedOrderResponse
 } from "./dto/order-response.dto";
 import { ORDER_CONSTANTS } from "src/constants";
+import { OrdersGateway } from "./orders.gateway";
 
 @Injectable()
 export class OrderService {
@@ -21,8 +22,9 @@ export class OrderService {
     @Inject(ORDER_CONSTANTS.RABBITMQ_PAYMENT_SERVICE)
     private readonly clientOrder: ClientProxy,
     @Inject(ORDER_CONSTANTS.RABBITMQ_MAIL_SERVICE)
-    private readonly clientMail: ClientProxy
-  ) {}
+    private readonly clientMail: ClientProxy,
+    private readonly ordersGateway: OrdersGateway
+  ) { }
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
     const order: OrderEntity = this.orderRepository.create({
@@ -32,16 +34,18 @@ export class OrderService {
 
     const savedOrder: OrderEntity = await this.orderRepository.save(order);
 
-    this.clientOrder.emit(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
-      orderId: savedOrder.id,
-      amount: savedOrder.amount,
-      userId: savedOrder.userId,
-      token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
-    });
+    setTimeout(() => {
+      this.clientOrder.emit(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
+        orderId: savedOrder.id,
+        amount: savedOrder.amount,
+        userId: savedOrder.userId,
+        token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
+      });
+    }, 10_000);
 
-    return {
-      data: savedOrder
-    };
+    this.ordersGateway.emitOrderCreated(savedOrder);
+
+    return { data: savedOrder };
   }
 
   async handlePaymentResult(data: {
@@ -52,12 +56,15 @@ export class OrderService {
       id: data.orderId
     });
     if (!order) return;
+
     order.status =
       data.status === "confirmed"
         ? OrderStatus.CONFIRMED
         : OrderStatus.CANCELLED;
-    await this.orderRepository.save(order);
 
+    const updatedOrder = await this.orderRepository.save(order);
+
+    // Send email notification
     this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
       to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
       order: {
@@ -67,6 +74,9 @@ export class OrderService {
         status: order.status
       }
     });
+
+    // Emit to WebSocket for real-time updates
+    this.ordersGateway.emitOrderUpdated(updatedOrder);
   }
 
   async updateOrder(
@@ -100,7 +110,7 @@ export class OrderService {
       throw new BadRequestException("Order cannot delivered");
 
     order.status = status;
-    await this.orderRepository.save(order);
+    const updatedOrder = await this.orderRepository.save(order);
 
     this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
       to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
@@ -112,7 +122,9 @@ export class OrderService {
       }
     });
 
-    return { data: order };
+    this.ordersGateway.emitOrderUpdated(updatedOrder);
+
+    return { data: updatedOrder };
   }
 
   async getOrderById(orderId: string): Promise<OrderResponse> {
