@@ -7,10 +7,10 @@ export class MailService {
   constructor(
     @Inject(IMailServiceToken)
     private readonly mailProvider: IMailService,
-  ) {}
+  ) { }
 
-  async sendMailStatusOrder(order, toEmail: string) {
-    await this.mailProvider.sendOrderStatusMail(toEmail, {
+  sendMailStatusOrder(order, toEmail: string) {
+    this.mailProvider.sendOrderStatusMail(toEmail, {
       id: order.id,
       productName: order.productName,
       amount: order.amount,

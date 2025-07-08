@@ -14,6 +14,8 @@ export const TOAST_MESSAGES = {
     ORDER_UPDATE_ERROR: 'Có lỗi khi cập nhật trạng thái đơn hàng',
     RETRY_PAYMENT_SUCCESS: 'Thử lại thanh toán thành công',
     RETRY_PAYMENT_ERROR: 'Có lỗi khi thử lại thanh toán',
+    RETRY_PAYMENT_SUCCESS_CONFIRMED: 'Thử lại thanh toán thành công! Đơn hàng đã được xác nhận.',
+    RETRY_PAYMENT_FAILED_CANCELLED: 'Thử lại thanh toán thất bại. Đơn hàng vẫn ở trạng thái đã hủy.',
     STATUS_UPDATE_SUCCESS: 'Cập nhật trạng thái thành công',
     ORDER_STATUS: {
         CANCELLED: 'Hủy đơn hàng thành công',

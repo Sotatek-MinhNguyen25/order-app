@@ -243,7 +243,7 @@ const OrdersDashboard: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{order.productName}</h3>
-
+                      <p>{order.id}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-6">

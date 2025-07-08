@@ -5,7 +5,7 @@ import { NOTIFICATION_CONSTANTS } from 'src/constants';
 
 @Injectable()
 export class SmtpMailService implements IMailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: MailerService) { }
 
   async sendOrderStatusMail(
     to: string,

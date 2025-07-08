@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   ArrowLeft,
   Package,
@@ -13,6 +14,7 @@ import {
 import { useOrderDetail, useRetryPayment, useUpdateOrderStatus } from '../hooks/useOrderDetail';
 import { OrderStatus } from '../types/order';
 import { formatCurrency, formatDate } from '../libs/utils';
+import { TOAST_MESSAGES } from '../constants';
 
 const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,7 +41,42 @@ const OrderDetail: React.FC = () => {
     });
   };
 
-  const handleRetry = () => id && retryPayment.mutate(id);
+  const handleRetry = () => {
+    if (!id || !order) return;
+
+    const previousStatus = order.status;
+
+    retryPayment.mutate(id, {
+      onSuccess: (updatedOrder) => {
+        const newStatus = updatedOrder.status;
+
+        if (previousStatus === OrderStatus.CANCELLED) {
+          switch (newStatus) {
+            case OrderStatus.CONFIRMED:
+              toast.success(TOAST_MESSAGES.RETRY_PAYMENT_SUCCESS_CONFIRMED);
+              navigate("/orders");
+              break;
+
+            case OrderStatus.CANCELLED:
+              toast.error(TOAST_MESSAGES.RETRY_PAYMENT_FAILED_CANCELLED);
+              break;
+
+            default:
+              toast.success(`Thử lại thanh toán hoàn tất. Trạng thái: ${newStatus}`);
+              navigate("/orders");
+          }
+        } else {
+          toast.success(`Đã cập nhật trạng thái đơn hàng: ${newStatus}`);
+          navigate("/orders");
+        }
+      },
+
+      onError: () => {
+        toast.error("Đã xảy ra lỗi khi thử lại thanh toán.");
+      },
+    });
+  };
+
 
   if (!id) return <p className="text-red-500">Không tìm thấy mã đơn hàng.</p>;
   if (isPending) {

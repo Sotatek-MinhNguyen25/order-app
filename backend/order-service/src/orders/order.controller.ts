@@ -17,12 +17,18 @@ import { UpdateOrderDto } from "./dto/update-order.dto";
 
 @Controller("/orders")
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   @ResponseMessage("Create order success")
   async createOrder(@Body() dto: CreateOrderDto) {
     return await this.orderService.createOrder(dto);
+  }
+
+  @Post("/:id/retry-payment")
+  @ResponseMessage("Retry payment success")
+  async retryPayment(@Param('id') id: string) {
+    return await this.orderService.retryPayment(id)
   }
 
   @Patch("/:orderId")

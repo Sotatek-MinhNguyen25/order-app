@@ -13,6 +13,7 @@ import {
 } from "./dto/order-response.dto";
 import { ORDER_CONSTANTS } from "src/constants";
 import { OrdersGateway } from "./orders.gateway";
+import { firstValueFrom } from "rxjs";
 
 @Injectable()
 export class OrderService {
@@ -27,23 +28,19 @@ export class OrderService {
   ) { }
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
-    const order: OrderEntity = this.orderRepository.create({
+    const order = this.orderRepository.create({
       ...dto,
-      status: OrderStatus.CREATED
+      status: OrderStatus.CREATED,
     });
 
-    const savedOrder: OrderEntity = await this.orderRepository.save(order);
+    const savedOrder = await this.orderRepository.save(order);
 
+    // Emit sau 10 giây
     setTimeout(() => {
-      this.clientOrder.emit(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
-        orderId: savedOrder.id,
-        amount: savedOrder.amount,
-        userId: savedOrder.userId,
-        token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
-      });
+      this.emitOrderCreated(savedOrder);
     }, 10_000);
 
-    this.ordersGateway.emitOrderCreated(savedOrder);
+    this.emitOrderRealtime(savedOrder);
 
     return { data: savedOrder };
   }
@@ -51,11 +48,9 @@ export class OrderService {
   async handlePaymentResult(data: {
     orderId: string;
     status: string;
-  }): Promise<void> {
-    const order: OrderEntity | null = await this.orderRepository.findOneBy({
-      id: data.orderId
-    });
-    if (!order) return;
+  }): Promise<OrderEntity> {
+    const order = await this.orderRepository.findOneBy({ id: data.orderId });
+    if (!order) throw new BadRequestException("ORDER.NOT_FOUND");
 
     order.status =
       data.status === "confirmed"
@@ -64,66 +59,58 @@ export class OrderService {
 
     const updatedOrder = await this.orderRepository.save(order);
 
-    // Send email notification
-    this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
-      to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
-      order: {
-        id: order.id,
-        productName: order.productName,
-        amount: order.amount,
-        status: order.status
-      }
-    });
+    await this.sendOrderUpdated(updatedOrder);
 
-    // Emit to WebSocket for real-time updates
-    this.ordersGateway.emitOrderUpdated(updatedOrder);
+    return updatedOrder;
   }
 
-  async updateOrder(
-    orderId: string,
-    status: OrderStatus
-  ): Promise<OrderResponse> {
+  async updateOrder(orderId: string, status: OrderStatus): Promise<OrderResponse> {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("Order not found");
+
     const currentStatus = order.status;
 
-    if (
-      currentStatus === OrderStatus.CANCELLED ||
-      currentStatus === OrderStatus.DELIVERED
-    )
-      throw new BadRequestException(
-        `Cannot update order in status '${currentStatus}'`
-      );
+    if ([OrderStatus.CANCELLED, OrderStatus.DELIVERED].includes(currentStatus)) {
+      throw new BadRequestException(`Cannot update order in status '${currentStatus}'`);
+    }
 
     if (
       status === OrderStatus.CANCELLED &&
-      currentStatus !== OrderStatus.CREATED &&
-      currentStatus !== OrderStatus.CONFIRMED
+      ![OrderStatus.CREATED, OrderStatus.CONFIRMED].includes(currentStatus)
     ) {
       throw new BadRequestException("Order cannot be cancelled");
     }
 
-    if (
-      status === OrderStatus.DELIVERED &&
-      currentStatus !== OrderStatus.CONFIRMED
-    )
-      throw new BadRequestException("Order cannot delivered");
+    if (status === OrderStatus.DELIVERED && currentStatus !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException("Order cannot be delivered");
+    }
 
     order.status = status;
     const updatedOrder = await this.orderRepository.save(order);
 
-    this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
-      to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
-      order: {
-        id: order.id,
-        productName: order.productName,
+    await this.sendOrderUpdated(updatedOrder);
+
+    return { data: updatedOrder };
+  }
+  async retryPayment(orderId: string): Promise<OrderResponse> {
+    const order = await this.orderRepository.findOneBy({ id: orderId });
+    if (!order) throw new BadRequestException("ORDER.NOT_FOUND");
+
+    if (order.status !== OrderStatus.CANCELLED) {
+      throw new BadRequestException("ORDER.NOT.RETRY_PAYMENT");
+    }
+
+    // Gửi yêu cầu thanh toán và chờ kết quả
+    const result = await firstValueFrom(
+      this.clientOrder.send(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
+        orderId: order.id,
         amount: order.amount,
-        status: order.status
-      }
-    });
+        userId: order.userId,
+        token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN,
+      }),
+    );
 
-    this.ordersGateway.emitOrderUpdated(updatedOrder);
-
+    const updatedOrder = await this.handlePaymentResult(result);
     return { data: updatedOrder };
   }
 
@@ -149,5 +136,34 @@ export class OrderService {
     query.orderBy(`order.${dto.sortBy}`, dto.sortOrder);
 
     return paginate(query, dto.page, dto.limit);
+  }
+
+  private emitOrderCreated(order: OrderEntity) {
+    this.clientOrder.emit(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
+      orderId: order.id,
+      amount: order.amount,
+      userId: order.userId,
+      token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN,
+    });
+  }
+
+  private emitOrderRealtime(order: OrderEntity) {
+    this.ordersGateway.emitOrderUpdated(order);
+  }
+
+  private async sendOrderUpdated(order: OrderEntity) {
+    // Gửi mail
+    this.clientMail.emit(ORDER_CONSTANTS.EVENTS.ORDER_SEND_MAIL, {
+      to: ORDER_CONSTANTS.DEFAULT_EMAIL_RECIPIENT,
+      order: {
+        id: order.id,
+        productName: order.productName,
+        amount: order.amount,
+        status: order.status,
+      },
+    });
+
+    // Gửi WebSocket
+    this.emitOrderRealtime(order);
   }
 }

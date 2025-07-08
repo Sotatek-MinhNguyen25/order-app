@@ -40,7 +40,6 @@ export const useRetryPayment = () => {
   return useMutation({
     mutationFn: ordersApi.retryPayment,
     onSuccess: (updatedOrder: Order) => {
-      toast.success(TOAST_MESSAGES.RETRY_PAYMENT_SUCCESS);
       queryClient.setQueryData(QUERY_KEYS.ORDER_DETAIL(updatedOrder.id), updatedOrder);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
     },

@@ -41,7 +41,7 @@ export const ordersApi = {
 
   retryPayment: async (id: string): Promise<Order> => {
     const { data } = await api.post(`/orders/${id}/retry-payment`);
-    return data;
+    return data.data;
   },
 };
 
