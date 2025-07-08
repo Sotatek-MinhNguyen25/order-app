@@ -17,7 +17,7 @@ import { UpdateOrderDto } from "./dto/update-order.dto";
 
 @Controller("/orders")
 export class OrderController {
-  constructor(private readonly orderService: OrderService) { }
+  constructor(private readonly orderService: OrderService) {}
 
   @Post()
   @ResponseMessage("Create order success")
@@ -27,8 +27,8 @@ export class OrderController {
 
   @Post("/:id/retry-payment")
   @ResponseMessage("Retry payment success")
-  async retryPayment(@Param('id') id: string) {
-    return await this.orderService.retryPayment(id)
+  async retryPayment(@Param("id") id: string) {
+    return await this.orderService.retryPayment(id);
   }
 
   @Patch("/:orderId")

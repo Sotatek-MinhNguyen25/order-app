@@ -10,7 +10,10 @@ import { OrdersGateway } from "./orders.gateway";
 
 @Module({
   imports: [TypeOrmModule.forFeature([OrderEntity]), RabbitMQModule],
-  controllers: [OrderController, OrdersMessageController],
+  controllers: [
+    OrderController,
+    OrdersMessageController,
+  ],
   providers: [OrderService, OrdersGateway],
   exports: [OrderService, OrdersGateway]
 })

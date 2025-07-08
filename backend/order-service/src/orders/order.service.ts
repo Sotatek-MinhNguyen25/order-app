@@ -25,12 +25,12 @@ export class OrderService {
     @Inject(ORDER_CONSTANTS.RABBITMQ_MAIL_SERVICE)
     private readonly clientMail: ClientProxy,
     private readonly ordersGateway: OrdersGateway
-  ) { }
+  ) {}
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
     const order = this.orderRepository.create({
       ...dto,
-      status: OrderStatus.CREATED,
+      status: OrderStatus.CREATED
     });
 
     const savedOrder = await this.orderRepository.save(order);
@@ -64,14 +64,21 @@ export class OrderService {
     return updatedOrder;
   }
 
-  async updateOrder(orderId: string, status: OrderStatus): Promise<OrderResponse> {
+  async updateOrder(
+    orderId: string,
+    status: OrderStatus
+  ): Promise<OrderResponse> {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("Order not found");
 
     const currentStatus = order.status;
 
-    if ([OrderStatus.CANCELLED, OrderStatus.DELIVERED].includes(currentStatus)) {
-      throw new BadRequestException(`Cannot update order in status '${currentStatus}'`);
+    if (
+      [OrderStatus.CANCELLED, OrderStatus.DELIVERED].includes(currentStatus)
+    ) {
+      throw new BadRequestException(
+        `Cannot update order in status '${currentStatus}'`
+      );
     }
 
     if (
@@ -81,7 +88,10 @@ export class OrderService {
       throw new BadRequestException("Order cannot be cancelled");
     }
 
-    if (status === OrderStatus.DELIVERED && currentStatus !== OrderStatus.CONFIRMED) {
+    if (
+      status === OrderStatus.DELIVERED &&
+      currentStatus !== OrderStatus.CONFIRMED
+    ) {
       throw new BadRequestException("Order cannot be delivered");
     }
 
@@ -106,8 +116,8 @@ export class OrderService {
         orderId: order.id,
         amount: order.amount,
         userId: order.userId,
-        token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN,
-      }),
+        token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
+      })
     );
 
     const updatedOrder = await this.handlePaymentResult(result);
@@ -143,7 +153,7 @@ export class OrderService {
       orderId: order.id,
       amount: order.amount,
       userId: order.userId,
-      token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN,
+      token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
     });
   }
 
@@ -159,8 +169,8 @@ export class OrderService {
         id: order.id,
         productName: order.productName,
         amount: order.amount,
-        status: order.status,
-      },
+        status: order.status
+      }
     });
 
     // Gửi WebSocket

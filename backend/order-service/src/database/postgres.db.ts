@@ -17,4 +17,4 @@ import { orderConfig } from "src/config";
     })
   ]
 })
-export class DatabaseModule { }
+export class DatabaseModule {}

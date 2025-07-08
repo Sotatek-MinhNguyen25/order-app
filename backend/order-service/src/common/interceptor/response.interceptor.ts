@@ -9,7 +9,7 @@ import { Reflector } from "@nestjs/core";
 
 @Injectable()
 export class ResponseMessageInterceptor implements NestInterceptor {
-  constructor(private reflect: Reflector) {}
+  constructor(private reflect: Reflector) { }
 
   intercept(
     context: ExecutionContext,
@@ -24,7 +24,7 @@ export class ResponseMessageInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((response) => ({
         status: "success",
-        statusCode: statusCode,
+        statusCode: 200,
         message: responseMessage || "",
         data: response.data || {},
         meta: response.meta || {},

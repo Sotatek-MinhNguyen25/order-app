@@ -68,6 +68,6 @@ async function bootstrap() {
 
   logger.log(`🚀 Order Service is running on port :: ${PORT}`);
   logger.log(`📚 Swagger available at http://localhost:${PORT}/api`);
-  logger.log(`📬 Connected to RabbitMQ queue: ${rabbitMqQueue}`)
+  logger.log(`📬 Connected to RabbitMQ queue: ${rabbitMqQueue}`);
 }
 bootstrap();

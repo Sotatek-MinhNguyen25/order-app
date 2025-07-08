@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 export class OrderConfig {
+  HOST = process.env.HOST || "127.0.0.1";
   PORT: number = Number(process.env.PORT) || 8005;
 
   DB_HOST: string = process.env.DB_HOST || "localhost";

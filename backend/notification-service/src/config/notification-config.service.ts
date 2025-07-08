@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config()
 
 export class NotificationConfig {
+  host = process.env.HOST || '127.0.0.1'
   port = Number(process.env.PORT) || 8007;
 
   rabbitmqUrl =

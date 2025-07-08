@@ -4,6 +4,7 @@ import { socket } from '../libs/socket';
 import { Order } from '../types/order';
 import { WEBSOCKET_EVENTS, QUERY_KEYS } from '../constants';
 import { useConnection } from './useConnection';
+import toast from 'react-hot-toast';
 
 export const useRealtimeOrders = () => {
   const queryClient = useQueryClient();
@@ -39,6 +40,9 @@ export const useRealtimeOrders = () => {
     const handleOrderUpdated = (order: Order) => {
       queryClient.setQueryData(QUERY_KEYS.ORDER_DETAIL(order.id), order);
       updateOrderList(order);
+      toast(`Đơn hàng #${order.productName} đã cập nhật trạng thái`, {
+        icon: '🔄',
+      });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
     };
 
