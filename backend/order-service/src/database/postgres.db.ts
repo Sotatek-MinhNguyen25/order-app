@@ -12,9 +12,9 @@ import { orderConfig } from "src/config";
       username: orderConfig.DB_USER,
       password: orderConfig.DB_PASSWORD,
       database: orderConfig.DB_NAME,
-      synchronize: true,
+      synchronize: false,
       entities: [OrderEntity]
     })
   ]
 })
-export class DatabaseModule {}
+export class DatabaseModule { }
