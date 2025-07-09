@@ -21,11 +21,13 @@ export const ordersApi = {
   getOrders: async (filters: OrderFilters = {}): Promise<OrdersResponse> => {
     const query = buildQueryParams(filters);
     const { data } = await api.get(`/orders${query ? `?${query}` : ''}`);
+    console.log(data)
     return data;
   },
 
   getOrderById: async (id: string): Promise<Order> => {
     const { data } = await api.get(`/orders/${id}`);
+    console.log(data.data)
     return data.data;
   },
 

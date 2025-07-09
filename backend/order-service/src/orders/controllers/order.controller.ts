@@ -8,12 +8,11 @@ import {
   Put,
   Query
 } from "@nestjs/common";
-import { OrderService } from "./order.service";
-import { CreateOrderDto } from "./dto/create-order.dto";
-import { GetListDto } from "./dto/get-list.dto";
+import { OrderService } from "../services/order.service";
 import { ResponseMessage } from "src/common/decorators";
-import { OrderStatus } from "./entity/order.enum";
-import { UpdateOrderDto } from "./dto/update-order.dto";
+import { CreateOrderDto } from "../dto/create-order.dto";
+import { UpdateOrderDto } from "../dto/update-order.dto";
+import { GetListDto } from "../dto/get-list.dto";
 
 @Controller("/orders")
 export class OrderController {

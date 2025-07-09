@@ -1,20 +1,25 @@
 import { Module } from "@nestjs/common";
-import { OrderController } from "./order.controller";
-import { OrderService } from "./order.service";
+import { OrderService } from "./services/order.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { OrderEntity } from "./entity/order.entity";
 import { ClientsModule, Transport } from "@nestjs/microservices";
-import { OrdersMessageController } from "./order-message.controller";
 import { RabbitMQModule } from "src/base/rabbitmq/rabbitmq.module";
-import { OrdersGateway } from "./orders.gateway";
+import { OrdersGateway } from "./services/orders.gateway";
+import { CacheApiModule } from "src/database/cache/cache.module";
+import { OrderController } from "./controllers/order.controller";
+import { OrdersMessageController } from "./controllers/order-message.controller";
+import { OrderCacheService } from "./services/order-cache.service";
+import { RedisModule } from "src/database/redis/redis.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OrderEntity]), RabbitMQModule],
-  controllers: [
-    OrderController,
-    OrdersMessageController,
+  imports: [
+    TypeOrmModule.forFeature([OrderEntity]),
+    RabbitMQModule,
+    CacheApiModule,
+    RedisModule
   ],
-  providers: [OrderService, OrdersGateway],
-  exports: [OrderService, OrdersGateway]
+  controllers: [OrderController, OrdersMessageController],
+  providers: [OrderService, OrdersGateway, OrderCacheService],
+  exports: [OrderService, OrdersGateway, OrderCacheService]
 })
 export class OrderModule { }

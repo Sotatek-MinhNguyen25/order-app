@@ -45,5 +45,19 @@ export const ORDER_CONSTANTS = {
       ORDER_GET_ALL: "order.get_all",
       ORDER_GET_BY_ID: "order.get_by_id"
     }
+  },
+
+  CACHE: {
+    LIST: {
+      ORDER_TTL: 60
+    },
+
+    DETAIL: {
+      ORDER_TTL: 60
+    }
+  },
+
+  REDIS_CLIENT: {
+    NAME: "REDIS_CLIENT"
   }
 } as const;

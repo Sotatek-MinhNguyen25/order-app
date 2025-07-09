@@ -1,7 +1,7 @@
 import { Controller, Logger } from "@nestjs/common";
 import { EventPattern, Payload } from "@nestjs/microservices";
-import { OrderService } from "./order.service";
 import { ORDER_CONSTANTS } from "src/constants";
+import { OrderService } from "../services/order.service";
 
 @Controller()
 export class OrdersMessageController {

@@ -30,7 +30,7 @@ export class GetListDto {
   @ApiPropertyOptional({ example: "createdAt" })
   @IsOptional()
   @IsString()
-  sortBy?: string;
+  sortBy?: string = "createdAt";
 
   @ApiPropertyOptional({ enum: SortOrder, example: SortOrder.DESC })
   @IsOptional()

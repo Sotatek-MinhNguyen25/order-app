@@ -18,6 +18,12 @@ export class OrderConfig {
   RABBITMQ_PAYMENT_QUEUE: string =
     process.env.RABBIT_PAYMENT_QUEUE || "payment_queue";
   RABBITMQ_MAIL_QUEUE: string = process.env.RABBIT_MAIL_QUEUE || "mail_queue";
+
+  REDIS_HOST: string = process.env.REDIS_HOST || "localhost";
+  REDIS_PORT: number = parseInt(process.env.REDIS_PORT || "6379");
+
+  THROTTLER_LIMIT: number = parseInt(process.env.THROTTLER_LIMIT || "5");
+  THROTTLER_TTL: number = parseInt(process.env.THROTTLER_TTL || "60");
 }
 
 export const orderConfig = new OrderConfig();

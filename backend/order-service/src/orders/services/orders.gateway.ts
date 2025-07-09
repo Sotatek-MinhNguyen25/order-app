@@ -7,7 +7,7 @@ import {
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { Logger } from "@nestjs/common";
-import { OrderEntity } from "../orders/entity/order.entity";
+import { OrderEntity } from "../entity/order.entity";
 import { ORDER_CONSTANTS } from "src/constants";
 
 @WebSocketGateway({

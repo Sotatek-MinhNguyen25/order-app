@@ -1,22 +1,27 @@
-import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { OrderEntity } from "./entity/order.entity";
+import { OrderEntity } from "../entity/order.entity";
 import { Repository } from "typeorm";
-import { OrderStatus } from "./entity/order.enum";
+import { OrderStatus } from "../entity/order.enum";
 import { ClientProxy } from "@nestjs/microservices";
-import { CreateOrderDto } from "./dto/create-order.dto";
-import { GetListDto } from "./dto/get-list.dto";
+import { CreateOrderDto } from "../dto/create-order.dto";
+import { GetListDto } from "../dto/get-list.dto";
 import { paginate } from "src/common/pagination/pagination.util";
 import {
   OrderResponse,
   PaginatedOrderResponse
-} from "./dto/order-response.dto";
+} from "../dto/order-response.dto";
 import { ORDER_CONSTANTS } from "src/constants";
 import { OrdersGateway } from "./orders.gateway";
 import { firstValueFrom } from "rxjs";
+import { Cache, CACHE_MANAGER } from "@nestjs/cache-manager";
+import { GenerateKeyCacheHelper } from "../helpers/generate-key-cache.helper";
+import { OrderCacheService } from "./order-cache.service";
 
 @Injectable()
 export class OrderService {
+  private readonly logger = new Logger(OrderService.name)
+
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orderRepository: Repository<OrderEntity>,
@@ -24,8 +29,9 @@ export class OrderService {
     private readonly clientOrder: ClientProxy,
     @Inject(ORDER_CONSTANTS.RABBITMQ_MAIL_SERVICE)
     private readonly clientMail: ClientProxy,
-    private readonly ordersGateway: OrdersGateway
-  ) {}
+    private readonly ordersGateway: OrdersGateway,
+    private readonly orderCache: OrderCacheService
+  ) { }
 
   async createOrder(dto: CreateOrderDto): Promise<OrderResponse> {
     const order = this.orderRepository.create({
@@ -34,6 +40,8 @@ export class OrderService {
     });
 
     const savedOrder = await this.orderRepository.save(order);
+
+    await this.orderCache.clearOrderListCache();
 
     // Emit sau 10 giây
     setTimeout(() => {
@@ -58,6 +66,9 @@ export class OrderService {
         : OrderStatus.CANCELLED;
 
     const updatedOrder = await this.orderRepository.save(order);
+
+    await this.orderCache.delOrder(order.id);
+    await this.orderCache.clearOrderListCache();
 
     await this.sendOrderUpdated(updatedOrder);
 
@@ -98,10 +109,14 @@ export class OrderService {
     order.status = status;
     const updatedOrder = await this.orderRepository.save(order);
 
+    await this.orderCache.delOrder(updatedOrder.id);
+    await this.orderCache.clearOrderListCache();
+
     await this.sendOrderUpdated(updatedOrder);
 
     return { data: updatedOrder };
   }
+
   async retryPayment(orderId: string): Promise<OrderResponse> {
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("ORDER.NOT_FOUND");
@@ -110,14 +125,15 @@ export class OrderService {
       throw new BadRequestException("ORDER.NOT.RETRY_PAYMENT");
     }
 
-    // Gửi yêu cầu thanh toán và chờ kết quả
+    const payload = {
+      orderId: order.id,
+      amount: order.amount,
+      userId: order.userId,
+      token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
+    };
+
     const result = await firstValueFrom(
-      this.clientOrder.send(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {
-        orderId: order.id,
-        amount: order.amount,
-        userId: order.userId,
-        token: ORDER_CONSTANTS.DEFAULT_PAYMENT_TOKEN
-      })
+      this.clientOrder.send(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, payload)
     );
 
     const updatedOrder = await this.handlePaymentResult(result);
@@ -125,14 +141,29 @@ export class OrderService {
   }
 
   async getOrderById(orderId: string): Promise<OrderResponse> {
+    const foundCache = await this.orderCache.getOrderById(orderId);
+    if (foundCache) {
+      this.logger.log(`Cache hit with key order:${orderId}`)
+      return { data: foundCache };
+    }
     const order = await this.orderRepository.findOneBy({ id: orderId });
     if (!order) throw new BadRequestException("Order not found");
+
+    await this.orderCache.setOrder(order);
+    this.logger.log(`Cache SET with key: ${order.id}`);
     return {
       data: order
     };
   }
 
   async getAllOrders(dto: GetListDto): Promise<PaginatedOrderResponse> {
+    const key = GenerateKeyCacheHelper(dto);
+    const foundCache = await this.orderCache.getOrderList(dto);
+    if (foundCache) {
+      this.logger.log(`Cache hit with keys : ${key}`)
+      return foundCache
+    };
+
     const query = await this.orderRepository.createQueryBuilder("order");
     if (dto.search) {
       query.where("order.productName LIKE :search", {
@@ -145,7 +176,11 @@ export class OrderService {
 
     query.orderBy(`order.${dto.sortBy}`, dto.sortOrder);
 
-    return paginate(query, dto.page, dto.limit);
+    const result = await paginate(query, dto.page, dto.limit);
+
+    await this.orderCache.setOrderList(dto, result);
+    this.logger.log(`Cache SET - List Key: ${key}`);
+    return result;
   }
 
   private emitOrderCreated(order: OrderEntity) {

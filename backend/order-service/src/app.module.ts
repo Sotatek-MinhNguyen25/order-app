@@ -5,17 +5,21 @@ import { DatabaseModule } from "./database/postgres.db";
 import { APP_FILTER } from "@nestjs/core";
 import { HttpExceptionFilter } from "./common/exception/http-exception.filter";
 import { RabbitMQModule } from "./base/rabbitmq/rabbitmq.module";
+import { CacheApiModule } from "./database/cache/cache.module";
+import { RedisModule } from "./database/redis/redis.module";
 
 @Module({
   imports: [
     // Global
     ConfigModule,
+    CacheApiModule,
 
     // Base
     RabbitMQModule,
 
     // DB
     DatabaseModule,
+    RedisModule,
 
     // Module
     OrderModule
@@ -28,4 +32,4 @@ import { RabbitMQModule } from "./base/rabbitmq/rabbitmq.module";
     }
   ]
 })
-export class AppModule {}
+export class AppModule { }
