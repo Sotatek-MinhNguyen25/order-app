@@ -49,6 +49,14 @@ async function bootstrap() {
     }
   });
 
+  // app.connectMicroservice<MicroserviceOptions>({
+  //   transport: Transport.TCP,
+  //   options: {
+  //     host: orderConfig.HOST,
+  //     port: orderConfig.PORT
+  //   }
+  // })
+
   const config = new DocumentBuilder()
     .setTitle("Order Service")
     .setDescription("Order Service API description")

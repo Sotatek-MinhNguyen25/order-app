@@ -1,20 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import {
-  ArrowLeft,
-  Package,
-  Calendar,
-  DollarSign,
-  RotateCcw,
-  X,
-  Loader2,
-  Truck,
-} from 'lucide-react';
 import { useOrderDetail, useRetryPayment, useUpdateOrderStatus } from '../hooks/useOrderDetail';
 import { OrderStatus } from '../types/order';
 import { formatCurrency, formatDate } from '../libs/utils';
-import { TOAST_MESSAGES } from '../constants';
+import { Loader2, Package, Calendar, DollarSign, ArrowLeft, Truck, X, RotateCcw } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { TOAST_MESSAGES } from '@/constants';
 
 const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,24 +13,6 @@ const OrderDetail: React.FC = () => {
   const { data: order, isPending, refetch } = useOrderDetail(id || '');
   const retryPayment = useRetryPayment();
   const updateOrderStatus = useUpdateOrderStatus();
-
-  useEffect(() => {
-    if (id) {
-      refetch();
-    }
-  }, [id, refetch]);
-
-  const handleCancel = () => {
-    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.CANCELLED }, {
-      onSuccess: () => navigate('/orders'),
-    });
-  };
-
-  const handleDeliver = () => {
-    if (id) updateOrderStatus.mutate({ id, status: OrderStatus.DELIVERED }, {
-      onSuccess: () => navigate('/orders'),
-    });
-  };
 
   const handleRetry = () => {
     if (!id || !order) return;
@@ -76,265 +49,165 @@ const OrderDetail: React.FC = () => {
       },
     });
   };
-
-
-  if (!id) return <p className="text-red-500">Không tìm thấy mã đơn hàng.</p>;
+  if (!id) return <p className="text-red-500 text-sm">Không tìm thấy mã đơn hàng.</p>;
   if (isPending) {
     return (
-      <div className="flex justify-center items-center h-40 text-gray-500">
-        <Loader2 className="animate-spin w-6 h-6 mr-2" />
+      <div className="flex justify-center items-center h-32 text-gray-500 text-sm">
+        <Loader2 className="animate-spin w-5 h-5 mr-2" />
         Đang tải chi tiết đơn hàng...
       </div>
     );
   }
-  if (!order) return <p className="text-gray-600">Không có dữ liệu đơn hàng.</p>;
+  if (!order) return <p className="text-gray-600 text-sm">Không có dữ liệu đơn hàng.</p>;
 
-  const renderInfoItem = (icon: React.ReactNode, label: string, value: React.ReactNode) => (
-    <div className="flex items-center space-x-3">
-      {icon}
-      <div>
-        <p className="text-sm text-gray-600">{label}</p>
-        <p className="font-medium">{value}</p>
-      </div>
-    </div>
-  );
-
-  const renderTimelineItem = (step: any, index: number, totalSteps: number) => (
-    <div key={step.key} className="flex items-start space-x-4">
-      <div className="flex-shrink-0">
-        <div
-          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center
-          ${step.completed
-              ? 'bg-green-500 border-green-500'
-              : step.active
-                ? 'bg-blue-500 border-blue-500'
-                : 'bg-white border-gray-300'
-            }`}
-        >
-          {step.completed && <div className="w-2 h-2 bg-white rounded-full" />}
-        </div>
-        {index < totalSteps - 1 && (
-          <div
-            className={`w-0.5 h-12 ml-1.5 mt-2 ${step.completed ? 'bg-green-500' : 'bg-gray-300'}`}
-          />
-        )}
-      </div>
-      <div className="flex-1 min-w-0 pb-8">
-        <p
-          className={`font-medium ${step.completed || step.active ? 'text-gray-900' : 'text-gray-400'}`}
-        >
-          {step.status}
-        </p>
-        <p
-          className={`text-sm mt-1 ${step.completed || step.active ? 'text-gray-600' : 'text-gray-400'}`}
-        >
-          {step.description}
-        </p>
-        {step.time && (
-          <p
-            className={`text-xs mt-2 ${step.active ? 'text-blue-600 font-medium' : 'text-gray-500'}`}
-          >
-            {step.time}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-
-  const generateTimeline = (status: OrderStatus, createdAt: string, updatedAt: string) => {
-    const steps = [
+  // Timeline logic giữ nguyên
+  const steps = [
+    {
+      key: OrderStatus.CREATED,
+      status: 'Đã tạo',
+      description: 'Đơn hàng được tạo thành công',
+      time: formatDate(order.createdAt),
+    },
+    {
+      key: OrderStatus.CONFIRMED,
+      status: 'Đã xác nhận',
+      description: 'Đơn hàng đang xử lý',
+      time: order.status === OrderStatus.CONFIRMED ? formatDate(order.updatedAt) : null,
+    },
+    {
+      key: OrderStatus.DELIVERED,
+      status: 'Đã giao',
+      description: 'Đơn hàng đã giao',
+      time: order.status === OrderStatus.DELIVERED ? formatDate(order.updatedAt) : null,
+    },
+  ];
+  let timeline = steps.map((step, idx) => ({
+    ...step,
+    completed: idx < steps.findIndex(s => s.key === order.status),
+    active: step.key === order.status,
+  }));
+  if (order.status === OrderStatus.CANCELLED) {
+    timeline = [
+      { ...steps[0], completed: true, active: false },
       {
-        key: OrderStatus.CREATED,
-        status: 'Đã tạo',
-        description: 'Đơn hàng được tạo thành công',
-        time: formatDate(createdAt),
-      },
-      {
-        key: OrderStatus.CONFIRMED,
-        status: 'Đã xác nhận',
-        description: 'Đơn hàng đang xử lý',
-        time: status === OrderStatus.CONFIRMED ? formatDate(updatedAt) : null,
-      },
-      {
-        key: OrderStatus.DELIVERED,
-        status: 'Đã giao',
-        description: 'Đơn hàng đã giao',
-        time: status === OrderStatus.DELIVERED ? formatDate(updatedAt) : null,
+        key: OrderStatus.CANCELLED,
+        status: 'Đã hủy',
+        description: 'Đơn hàng đã bị hủy',
+        time: formatDate(order.updatedAt),
+        completed: true,
+        active: true,
       },
     ];
+  }
 
-    if (status === OrderStatus.CANCELLED) {
-      return [
-        { ...steps[0], completed: true },
-        {
-          key: OrderStatus.CANCELLED,
-          status: 'Đã hủy',
-          description: 'Đơn hàng đã bị hủy',
-          time: formatDate(updatedAt),
-          completed: true,
-          active: true,
-        },
-      ];
-    }
-
-    const orderLevel =
-      {
-        [OrderStatus.CREATED]: 1,
-        [OrderStatus.CONFIRMED]: 2,
-        [OrderStatus.DELIVERED]: 3,
-      }[status] || 1;
-
-    return steps.map((step, index) => ({
-      ...step,
-      completed: index + 1 < orderLevel,
-      active: index + 1 === orderLevel,
-    }));
+  // Status badge
+  const statusColor = {
+    [OrderStatus.CREATED]: 'bg-blue-100 text-blue-700',
+    [OrderStatus.CONFIRMED]: 'bg-amber-100 text-amber-700',
+    [OrderStatus.DELIVERED]: 'bg-emerald-100 text-emerald-700',
+    [OrderStatus.CANCELLED]: 'bg-rose-100 text-rose-700',
   };
-
-  const getStatusConfig = (status: OrderStatus) => {
-    const colors =
-      {
-        [OrderStatus.CREATED]: 'blue',
-        [OrderStatus.CONFIRMED]: 'orange',
-        [OrderStatus.DELIVERED]: 'green',
-        [OrderStatus.CANCELLED]: 'red',
-      }[status] || 'blue';
-
-    return {
-      bgColor: `bg-${colors}-50`,
-      textColor: `text-${colors}-800`,
-      badgeColor: `bg-${colors}-100`,
-    };
-  };
-
-  const timeline = generateTimeline(order.status, order.createdAt, order.updatedAt);
-  const statusConfig = getStatusConfig(order.status);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-md">
-          <ArrowLeft className="h-5 w-5 text-gray-600" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Chi tiết đơn hàng
-          </h1>
-          <p className="text-gray-600">Thông tin chi tiết và tiến trình đơn hàng</p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Info + Timeline */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold mb-4">Thông tin đơn hàng</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderInfoItem(
-                <Package className="h-5 w-5 text-gray-400" />,
-                'Sản phẩm',
-                order.productName
-              )}
-              {renderInfoItem(
-                <DollarSign className="h-5 w-5 text-gray-400" />,
-                'Số tiền',
-                formatCurrency(order.amount)
-              )}
-              {renderInfoItem(
-                <Calendar className="h-5 w-5 text-gray-400" />,
-                'Ngày tạo',
-                formatDate(order.createdAt)
-              )}
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-white to-blue-50 py-6 px-2 md:px-6">
+      <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-5 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors">
+            <ArrowLeft className="w-4 h-4 text-blue-600" />
+          </button>
+          <div>
+            <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-0.5">Chi tiết đơn hàng</h1>
+            <p className="text-sm text-gray-500">Thông tin và tiến trình đơn hàng</p>
           </div>
+        </div>
 
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold mb-6">Tiến trình đơn hàng</h2>
-            <div className="space-y-0">
-              {timeline.map((step, index) => renderTimelineItem(step, index, timeline.length))}
+        {/* Thông tin đơn hàng */}
+        <div className="bg-blue-50 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center md:items-start">
+          <div className="flex-shrink-0 p-3 bg-white rounded-lg shadow flex items-center justify-center">
+            <Package className="h-8 w-8 text-blue-600" />
+          </div>
+          <div className="flex-1 space-y-1.5">
+            <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+              <div className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
+                {order.productName}
+              </div>
+              <span className={`ml-0 md:ml-3 px-2 py-1 rounded-full text-xs font-medium border ${statusColor[order.status]} border-current`}>{
+                {
+                  [OrderStatus.CREATED]: 'Đã tạo',
+                  [OrderStatus.CONFIRMED]: 'Đã xác nhận',
+                  [OrderStatus.DELIVERED]: 'Đã giao',
+                  [OrderStatus.CANCELLED]: 'Đã hủy',
+                }[order.status]
+              }</span>
+            </div>
+            <div className="flex flex-col md:flex-row md:gap-6 text-gray-700 text-xs mt-1.5">
+              <div className="flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> {formatCurrency(order.amount)}</div>
+              <div className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {formatDate(order.createdAt)}</div>
+              <div className="flex items-center gap-1.5"><span className="font-semibold">ID:</span> {order.id}</div>
             </div>
           </div>
         </div>
 
-        {/* Right: Status + Actions */}
-        <div className="space-y-6">
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold mb-4">Trạng thái hiện tại</h2>
-            <div className="space-y-4">
-              <div className={`p-4 rounded-lg ${statusConfig.bgColor}`}>
-                <span
-                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border ${statusConfig.badgeColor} ${statusConfig.textColor}`}
-                >
-                  {order.status}
-                </span>
-              </div>
-              <div className="text-sm text-gray-600 space-y-2">
-                <div className="flex justify-between">
-                  <span>Ngày tạo:</span>
-                  <span className="font-medium">{formatDate(order.createdAt)}</span>
+        {/* Timeline */}
+        <div className="bg-white rounded-lg shadow border border-blue-100 p-4">
+          <h2 className="text-base font-bold text-blue-700 mb-3">Tiến trình đơn hàng</h2>
+          <ol className="relative border-l-2 border-blue-200 ml-3 space-y-4">
+            {timeline.map((step) => (
+              <li key={step.key} className="ml-3">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full border-2 flex items-center justify-center ${step.completed ? 'bg-emerald-500 border-emerald-500' : step.active ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'}`}>
+                    {step.completed && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  </div>
+                  <span className={`font-semibold text-xs ${step.completed || step.active ? 'text-gray-900' : 'text-gray-400'}`}>{step.status}</span>
+                  {step.time && <span className="text-xs text-gray-500 ml-1.5">{step.time}</span>}
                 </div>
-                <div className="flex justify-between">
-                  <span>Cập nhật lần cuối:</span>
-                  <span className="font-medium">{formatDate(order.updatedAt)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                <div className={`ml-5 text-xs ${step.completed || step.active ? 'text-gray-700' : 'text-gray-400'}`}>{step.description}</div>
+              </li>
+            ))}
+          </ol>
+        </div>
 
-          <div className="card p-6">
-            <h3 className="font-medium text-gray-900 mb-3">Thao tác</h3>
-            <div className="space-y-2">
-              {order.status === OrderStatus.CANCELLED && (
-                <button
-                  onClick={handleRetry}
-                  className="btn-success w-full"
-                  disabled={retryPayment.isPending}
-                >
-                  {retryPayment.isPending ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                  )}
-                  Thử lại thanh toán
-                </button>
-              )}
-
-              {order.status === OrderStatus.CONFIRMED && (
-                <button
-                  onClick={handleDeliver}
-                  className="btn-success w-full"
-                  disabled={updateOrderStatus.isPending}
-                >
-                  {updateOrderStatus.isPending ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Truck className="h-4 w-4 mr-2" />
-                  )}
-                  Giao hàng
-                </button>
-              )}
-
-              {(order.status === OrderStatus.CREATED || order.status === OrderStatus.CONFIRMED) && (
-                <button
-                  onClick={handleCancel}
-                  className="btn-danger w-full"
-                  disabled={updateOrderStatus.isPending}
-                >
-                  {updateOrderStatus.isPending ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <X className="h-4 w-4 mr-2" />
-                  )}
-                  Hủy đơn hàng
-                </button>
-              )}
-              <button onClick={() => navigate('/orders')} className="btn-secondary w-full">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Về danh sách đơn hàng
+        {/* Action buttons */}
+        <div className="bg-white rounded-lg shadow border border-blue-100 p-4 flex flex-col gap-3">
+          <h2 className="text-base font-bold text-blue-700 mb-1.5">Thao tác</h2>
+          <div className="flex flex-col md:flex-row gap-2">
+            {(order.status === OrderStatus.CREATED || order.status === OrderStatus.CONFIRMED) && (
+              <button
+                onClick={() => updateOrderStatus.mutate({ id, status: OrderStatus.CANCELLED }, { onSuccess: () => navigate('/orders') })}
+                className="flex-1 bg-rose-600 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow hover:bg-rose-700 transition-colors"
+                disabled={updateOrderStatus.isPending}
+              >
+                {updateOrderStatus.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" /> : <X className="h-3.5 w-3.5 inline mr-1.5" />}
+                Hủy đơn hàng
               </button>
-            </div>
+            )}
+            {order.status === OrderStatus.CONFIRMED && (
+              <button
+                onClick={() => updateOrderStatus.mutate({ id, status: OrderStatus.DELIVERED }, { onSuccess: () => navigate('/orders') })}
+                className="flex-1 bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow hover:bg-emerald-700 transition-colors"
+                disabled={updateOrderStatus.isPending}
+              >
+                {updateOrderStatus.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" /> : <Truck className="h-3.5 w-3.5 inline mr-1.5" />}
+                Giao hàng
+              </button>
+            )}
+            {order.status === OrderStatus.CANCELLED && (
+              <button
+                onClick={handleRetry}
+                className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow hover:bg-blue-700 transition-colors"
+                disabled={retryPayment.isPending}
+              >
+                {retryPayment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" /> : <RotateCcw className="h-3.5 w-3.5 inline mr-1.5" />}
+                Thử lại thanh toán
+              </button>
+            )}
+            <button
+              onClick={() => navigate('/orders')}
+              className="flex-1 bg-gray-100 text-gray-700 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+            >
+              ← Về danh sách
+            </button>
           </div>
         </div>
       </div>

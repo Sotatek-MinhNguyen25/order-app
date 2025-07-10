@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Package, RefreshCw } from 'lucide-react';
+import { Plus, Package, Search, RefreshCw } from 'lucide-react';
 import { useOrders } from '../hooks/useOrders';
 import { useRealtimeOrders } from '../hooks/useRealtimeOrders';
 import { OrderFilters, OrderStatus, SortOrder } from '../types/order';
 import { formatCurrency, formatDate } from '../libs/utils';
 
 const OrdersDashboard: React.FC = () => {
-  const [filters, setFilters] = useState<OrderFilters>({
+  const [filters, setFilters] = React.useState<OrderFilters>({
     page: 1,
     limit: 10,
     sortBy: 'createdAt',
@@ -86,191 +86,150 @@ const OrdersDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-6 text-white">
-        <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-5 px-2 md:px-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Quản lý đơn hàng</h1>
-            <p className="text-blue-100">Theo dõi và quản lý tất cả đơn hàng của bạn</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">Quản lý đơn hàng</h1>
+            <p className="text-gray-500 text-sm md:text-base">Theo dõi, tìm kiếm và thao tác với đơn hàng của bạn một cách dễ dàng.</p>
           </div>
-          <Link to="/orders/create" className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-medium transition-colors inline-flex items-center">
-            <Plus className="h-4 w-4 mr-2" />
+          <Link to="/orders/create" className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-md hover:scale-105 transition-transform font-semibold text-sm md:text-base">
+            <Plus className="h-4 w-4" />
             Tạo đơn hàng
           </Link>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Tổng đơn hàng</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            </div>
-            <div className="p-3 bg-blue-50 rounded-lg">
-              <Package className="h-6 w-6 text-blue-600" />
-            </div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
+            <div className="p-2 bg-blue-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-blue-600" /></div>
+            <p className="text-xs text-gray-500">Tổng đơn hàng</p>
+            <p className="text-xl font-bold text-gray-900">{stats.total}</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
+            <div className="p-2 bg-amber-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-amber-600" /></div>
+            <p className="text-xs text-gray-500">Đã xác nhận</p>
+            <p className="text-xl font-bold text-amber-600">{stats.confirmed}</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
+            <div className="p-2 bg-emerald-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-emerald-600" /></div>
+            <p className="text-xs text-gray-500">Đã giao</p>
+            <p className="text-xl font-bold text-emerald-600">{stats.delivered}</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
+            <div className="p-2 bg-rose-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-rose-600" /></div>
+            <p className="text-xs text-gray-500">Đã hủy</p>
+            <p className="text-xl font-bold text-rose-600">{stats.cancelled}</p>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Đã xác nhận</p>
-              <p className="text-2xl font-bold text-amber-600">{stats.confirmed}</p>
-            </div>
-            <div className="p-3 bg-amber-50 rounded-lg">
-              <Package className="h-6 w-6 text-amber-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Đã giao</p>
-              <p className="text-2xl font-bold text-emerald-600">{stats.delivered}</p>
-            </div>
-            <div className="p-3 bg-emerald-50 rounded-lg">
-              <Package className="h-6 w-6 text-emerald-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Đã hủy</p>
-              <p className="text-2xl font-bold text-rose-600">{stats.cancelled}</p>
-            </div>
-            <div className="p-3 bg-rose-50 rounded-lg">
-              <Package className="h-6 w-6 text-rose-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="h-4 w-4 absolute left-3 top-3 text-gray-400" />
+        {/* Filters */}
+        <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col md:flex-row gap-3 items-center">
+          <div className="flex-1 w-full relative">
+            <Search className="h-4 w-4 absolute left-3 top-2 text-gray-400" />
             <input
               type="text"
               placeholder="Tìm kiếm theo tên sản phẩm hoặc mã đơn hàng..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full pl-9 pr-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               value={filters.search || ''}
               onChange={e => handleSearchChange(e.target.value)}
             />
           </div>
-
-          <div className="flex gap-3">
-            <select
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={filters.status || ''}
-              onChange={e => handleStatusFilter((e.target.value as OrderStatus) || undefined)}
-            >
-              <option value="">Tất cả trạng thái</option>
-              <option value={OrderStatus.CREATED}>Đã tạo</option>
-              <option value={OrderStatus.CONFIRMED}>Đã xác nhận</option>
-              <option value={OrderStatus.DELIVERED}>Đã giao</option>
-              <option value={OrderStatus.CANCELLED}>Đã hủy</option>
-            </select>
-
-            <select
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              value={`${filters.sortBy}-${filters.sortOrder}`}
-              onChange={e => {
-                const [sortBy, sortOrder] = e.target.value.split('-');
-                setFilters(prev => ({ ...prev, sortBy, sortOrder: sortOrder as SortOrder }));
-              }}
-            >
-              <option value="createdAt-DESC">Mới nhất</option>
-              <option value="createdAt-ASC">Cũ nhất</option>
-              <option value="amount-DESC">Giá cao nhất</option>
-              <option value="amount-ASC">Giá thấp nhất</option>
-            </select>
-          </div>
+          <select
+            className="px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            value={filters.status || ''}
+            onChange={e => handleStatusFilter((e.target.value as OrderStatus) || undefined)}
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value={OrderStatus.CREATED}>Đã tạo</option>
+            <option value={OrderStatus.CONFIRMED}>Đã xác nhận</option>
+            <option value={OrderStatus.DELIVERED}>Đã giao</option>
+            <option value={OrderStatus.CANCELLED}>Đã hủy</option>
+          </select>
+          <select
+            className="px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            value={`${filters.sortBy}-${filters.sortOrder}`}
+            onChange={e => {
+              const [sortBy, sortOrder] = e.target.value.split('-');
+              setFilters(prev => ({ ...prev, sortBy, sortOrder: sortOrder as SortOrder }));
+            }}
+          >
+            <option value="createdAt-DESC">Mới nhất</option>
+            <option value="createdAt-ASC">Cũ nhất</option>
+            <option value="amount-DESC">Giá cao nhất</option>
+            <option value="amount-ASC">Giá thấp nhất</option>
+          </select>
         </div>
-      </div>
 
-      {/* Orders List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        {isPending ? (
-          <div className="p-8">
-            <div className="space-y-4">
+        {/* Orders List */}
+        <div className="bg-white rounded-xl shadow border border-gray-100">
+          {isPending ? (
+            <div className="p-4 flex flex-col gap-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="animate-pulse">
-                  <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <div className="flex items-center space-x-4">
-                      <div className="h-12 w-12 bg-gray-200 rounded-lg"></div>
-                      <div>
-                        <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-24"></div>
-                      </div>
+                <div key={i} className="animate-pulse flex items-center justify-between p-4 border-b border-gray-100">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
+                    <div>
+                      <div className="h-3 bg-gray-200 rounded w-28 mb-1.5"></div>
+                      <div className="h-2.5 bg-gray-200 rounded w-20"></div>
                     </div>
-                    <div className="flex items-center space-x-6">
-                      <div className="h-6 bg-gray-200 rounded w-20"></div>
-                      <div className="h-8 bg-gray-200 rounded w-24"></div>
-                    </div>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="h-5 bg-gray-200 rounded w-16"></div>
+                    <div className="h-7 bg-gray-200 rounded w-20"></div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        ) : !ordersResponse?.data?.length ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-              <Package className="h-8 w-8 text-gray-400" />
+          ) : !ordersResponse?.data?.length ? (
+            <div className="text-center py-12">
+              <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+                <Package className="h-6 w-6 text-gray-400" />
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-1.5">Chưa có đơn hàng nào</h3>
+              <p className="text-sm text-gray-600 mb-4">Bắt đầu bằng cách tạo đơn hàng đầu tiên của bạn</p>
+              <Link to="/orders/create" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors inline-flex items-center">
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Tạo đơn hàng
+              </Link>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có đơn hàng nào</h3>
-            <p className="text-gray-600 mb-6">Bắt đầu bằng cách tạo đơn hàng đầu tiên của bạn</p>
-            <Link to="/orders/create" className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center">
-              <Plus className="h-4 w-4 mr-2" />
-              Tạo đơn hàng
-            </Link>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {ordersResponse.data.map(order => (
-              <div key={order.id} className="p-6 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                      <Package className="h-6 w-6 text-white" />
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {ordersResponse.data.map(order => (
+                <div key={order.id} className="p-4 hover:bg-blue-50/30 transition-colors flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                      <Package className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{order.productName}</h3>
-                      <p>{order.id}</p>
+                      <h3 className="font-semibold text-gray-900 text-base">{order.productName}</h3>
+                      {/* <p className="text-xs text-gray-500">{order.id}</p> */}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="font-semibold text-gray-900">{formatCurrency(order.amount)}</p>
-                      <p className="text-sm text-gray-600">{formatDate(order.createdAt)}</p>
+                      <p className="font-semibold text-gray-900 text-base">{formatCurrency(order.amount)}</p>
+                      <p className="text-xs text-gray-600">{formatDate(order.createdAt)}</p>
                     </div>
                     {getStatusBadge(order.status)}
                     <Link
                       to={`/orders/${order.id}`}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                      className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors"
                     >
                       Xem chi tiết
                     </Link>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* Pagination */}
-      {ordersResponse && ordersResponse.meta.totalPages > 1 && (
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">
+        {/* Pagination */}
+        {ordersResponse && ordersResponse.meta.totalPages > 1 && (
+          <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <p className="text-xs text-gray-600">
               Hiển thị {(ordersResponse.meta.currentPage - 1) * ordersResponse.meta.pageSize + 1} -{' '}
               {Math.min(
                 ordersResponse.meta.currentPage * ordersResponse.meta.pageSize,
@@ -278,9 +237,9 @@ const OrdersDashboard: React.FC = () => {
               )}{' '}
               của {ordersResponse.meta.totalItems} đơn hàng
             </p>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1.5">
               <button
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={ordersResponse.meta.currentPage <= 1}
                 onClick={() => handlePageChange(ordersResponse.meta.currentPage - 1)}
               >
@@ -291,7 +250,7 @@ const OrdersDashboard: React.FC = () => {
                 return (
                   <button
                     key={page}
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${page === ordersResponse.meta.currentPage
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${page === ordersResponse.meta.currentPage
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
                       }`}
@@ -302,7 +261,7 @@ const OrdersDashboard: React.FC = () => {
                 );
               })}
               <button
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={ordersResponse.meta.currentPage >= ordersResponse.meta.totalPages}
                 onClick={() => handlePageChange(ordersResponse.meta.currentPage + 1)}
               >
@@ -310,8 +269,8 @@ const OrdersDashboard: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

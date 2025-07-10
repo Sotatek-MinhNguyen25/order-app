@@ -21,27 +21,13 @@ const MainLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
+            <Link to="/orders" className="flex items-center space-x-3 hover:opacity-90 transition-opacity">
               <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
                 <Package className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold text-gray-900">Order Management</span>
-            </div>
+            </Link>
 
-            {/* Navigation */}
-            <nav className="flex space-x-2">
-              <Link
-                to="/orders"
-                className={`inline-flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive('/orders')
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/25'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-              >
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-
-            </nav>
 
             {/* Connection Status */}
             <div className="flex items-center space-x-4">
