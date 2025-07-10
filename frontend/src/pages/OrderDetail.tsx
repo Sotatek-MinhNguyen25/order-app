@@ -3,7 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useOrderDetail, useRetryPayment, useUpdateOrderStatus } from '../hooks/useOrderDetail';
 import { OrderStatus } from '../types/order';
 import { formatCurrency, formatDate } from '../libs/utils';
-import { Loader2, Package, Calendar, DollarSign, ArrowLeft, Truck, X, RotateCcw } from 'lucide-react';
+import {
+  Loader2,
+  Package,
+  Calendar,
+  DollarSign,
+  ArrowLeft,
+  Truck,
+  X,
+  RotateCcw,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { TOAST_MESSAGES } from '@/constants';
 
@@ -20,14 +29,14 @@ const OrderDetail: React.FC = () => {
     const previousStatus = order.status;
 
     retryPayment.mutate(id, {
-      onSuccess: (updatedOrder) => {
+      onSuccess: updatedOrder => {
         const newStatus = updatedOrder.status;
 
         if (previousStatus === OrderStatus.CANCELLED) {
           switch (newStatus) {
             case OrderStatus.CONFIRMED:
               toast.success(TOAST_MESSAGES.RETRY_PAYMENT_SUCCESS_CONFIRMED);
-              navigate("/orders");
+              navigate('/orders');
               break;
 
             case OrderStatus.CANCELLED:
@@ -36,16 +45,16 @@ const OrderDetail: React.FC = () => {
 
             default:
               toast.success(`Thử lại thanh toán hoàn tất. Trạng thái: ${newStatus}`);
-              navigate("/orders");
+              navigate('/orders');
           }
         } else {
           toast.success(`Đã cập nhật trạng thái đơn hàng: ${newStatus}`);
-          navigate("/orders");
+          navigate('/orders');
         }
       },
 
       onError: () => {
-        toast.error("Đã xảy ra lỗi khi thử lại thanh toán.");
+        toast.error('Đã xảy ra lỗi khi thử lại thanh toán.');
       },
     });
   };
@@ -113,11 +122,16 @@ const OrderDetail: React.FC = () => {
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-5 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors"
+          >
             <ArrowLeft className="w-4 h-4 text-blue-600" />
           </button>
           <div>
-            <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-0.5">Chi tiết đơn hàng</h1>
+            <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-0.5">
+              Chi tiết đơn hàng
+            </h1>
             <p className="text-sm text-gray-500">Thông tin và tiến trình đơn hàng</p>
           </div>
         </div>
@@ -132,19 +146,26 @@ const OrderDetail: React.FC = () => {
               <div className="flex items-center gap-1.5 text-base font-semibold text-gray-900">
                 {order.productName}
               </div>
-              <span className={`ml-0 md:ml-3 px-2 py-1 rounded-full text-xs font-medium border ${statusColor[order.status]} border-current`}>{
+              <span
+                className={`ml-0 md:ml-3 px-2 py-1 rounded-full text-xs font-medium border ${statusColor[order.status]} border-current`}
+              >
                 {
-                  [OrderStatus.CREATED]: 'Đã tạo',
-                  [OrderStatus.CONFIRMED]: 'Đã xác nhận',
-                  [OrderStatus.DELIVERED]: 'Đã giao',
-                  [OrderStatus.CANCELLED]: 'Đã hủy',
-                }[order.status]
-              }</span>
+                  {
+                    [OrderStatus.CREATED]: 'Đã tạo',
+                    [OrderStatus.CONFIRMED]: 'Đã xác nhận',
+                    [OrderStatus.DELIVERED]: 'Đã giao',
+                    [OrderStatus.CANCELLED]: 'Đã hủy',
+                  }[order.status]
+                }
+              </span>
             </div>
             <div className="flex flex-col md:flex-row md:gap-6 text-gray-700 text-xs mt-1.5">
-              <div className="flex items-center gap-1.5"><DollarSign className="h-3.5 w-3.5" /> {formatCurrency(order.amount)}</div>
-              <div className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" /> {formatDate(order.createdAt)}</div>
-              <div className="flex items-center gap-1.5"><span className="font-semibold">ID:</span> {order.id}</div>
+              <div className="flex items-center gap-1.5">
+                <DollarSign className="h-3.5 w-3.5" /> {formatCurrency(order.amount)}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5" /> {formatDate(order.createdAt)}
+              </div>
             </div>
           </div>
         </div>
@@ -153,16 +174,26 @@ const OrderDetail: React.FC = () => {
         <div className="bg-white rounded-lg shadow border border-blue-100 p-4">
           <h2 className="text-base font-bold text-blue-700 mb-3">Tiến trình đơn hàng</h2>
           <ol className="relative border-l-2 border-blue-200 ml-3 space-y-4">
-            {timeline.map((step) => (
+            {timeline.map(step => (
               <li key={step.key} className="ml-3">
                 <div className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full border-2 flex items-center justify-center ${step.completed ? 'bg-emerald-500 border-emerald-500' : step.active ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'}`}>
+                  <div
+                    className={`w-3 h-3 rounded-full border-2 flex items-center justify-center ${step.completed ? 'bg-emerald-500 border-emerald-500' : step.active ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'}`}
+                  >
                     {step.completed && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                   </div>
-                  <span className={`font-semibold text-xs ${step.completed || step.active ? 'text-gray-900' : 'text-gray-400'}`}>{step.status}</span>
+                  <span
+                    className={`font-semibold text-xs ${step.completed || step.active ? 'text-gray-900' : 'text-gray-400'}`}
+                  >
+                    {step.status}
+                  </span>
                   {step.time && <span className="text-xs text-gray-500 ml-1.5">{step.time}</span>}
                 </div>
-                <div className={`ml-5 text-xs ${step.completed || step.active ? 'text-gray-700' : 'text-gray-400'}`}>{step.description}</div>
+                <div
+                  className={`ml-5 text-xs ${step.completed || step.active ? 'text-gray-700' : 'text-gray-400'}`}
+                >
+                  {step.description}
+                </div>
               </li>
             ))}
           </ol>
@@ -174,21 +205,39 @@ const OrderDetail: React.FC = () => {
           <div className="flex flex-col md:flex-row gap-2">
             {(order.status === OrderStatus.CREATED || order.status === OrderStatus.CONFIRMED) && (
               <button
-                onClick={() => updateOrderStatus.mutate({ id, status: OrderStatus.CANCELLED }, { onSuccess: () => navigate('/orders') })}
+                onClick={() =>
+                  updateOrderStatus.mutate(
+                    { id, status: OrderStatus.CANCELLED },
+                    { onSuccess: () => navigate('/orders') }
+                  )
+                }
                 className="flex-1 bg-rose-600 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow hover:bg-rose-700 transition-colors"
                 disabled={updateOrderStatus.isPending}
               >
-                {updateOrderStatus.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" /> : <X className="h-3.5 w-3.5 inline mr-1.5" />}
+                {updateOrderStatus.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" />
+                ) : (
+                  <X className="h-3.5 w-3.5 inline mr-1.5" />
+                )}
                 Hủy đơn hàng
               </button>
             )}
             {order.status === OrderStatus.CONFIRMED && (
               <button
-                onClick={() => updateOrderStatus.mutate({ id, status: OrderStatus.DELIVERED }, { onSuccess: () => navigate('/orders') })}
+                onClick={() =>
+                  updateOrderStatus.mutate(
+                    { id, status: OrderStatus.DELIVERED },
+                    { onSuccess: () => navigate('/orders') }
+                  )
+                }
                 className="flex-1 bg-emerald-600 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow hover:bg-emerald-700 transition-colors"
                 disabled={updateOrderStatus.isPending}
               >
-                {updateOrderStatus.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" /> : <Truck className="h-3.5 w-3.5 inline mr-1.5" />}
+                {updateOrderStatus.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" />
+                ) : (
+                  <Truck className="h-3.5 w-3.5 inline mr-1.5" />
+                )}
                 Giao hàng
               </button>
             )}
@@ -198,7 +247,11 @@ const OrderDetail: React.FC = () => {
                 className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow hover:bg-blue-700 transition-colors"
                 disabled={retryPayment.isPending}
               >
-                {retryPayment.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" /> : <RotateCcw className="h-3.5 w-3.5 inline mr-1.5" />}
+                {retryPayment.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1.5" />
+                ) : (
+                  <RotateCcw className="h-3.5 w-3.5 inline mr-1.5" />
+                )}
                 Thử lại thanh toán
               </button>
             )}

@@ -25,7 +25,9 @@ const mockProducts = [
 const CreateOrder: React.FC = () => {
   const navigate = useNavigate();
   const createOrderMutation = useCreateOrder();
-  const [selectedProduct, setSelectedProduct] = React.useState<typeof mockProducts[0] | null>(null);
+  const [selectedProduct, setSelectedProduct] = React.useState<(typeof mockProducts)[0] | null>(
+    null
+  );
 
   const {
     register,
@@ -38,7 +40,7 @@ const CreateOrder: React.FC = () => {
     defaultValues: { userId: '', productName: '', amount: 0 },
   });
 
-  const handleProductSelect = (product: typeof mockProducts[0]) => {
+  const handleProductSelect = (product: (typeof mockProducts)[0]) => {
     setSelectedProduct(product);
     setValue('productName', product.name);
     setValue('amount', product.price);
@@ -59,11 +61,16 @@ const CreateOrder: React.FC = () => {
       <div className="max-w-lg mx-auto bg-white rounded-xl shadow-lg p-5 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate(-1)} className="p-1.5 hover:bg-emerald-50 rounded-lg transition-colors">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-1.5 hover:bg-emerald-50 rounded-lg transition-colors"
+          >
             <ArrowLeft className="w-4 h-4 text-emerald-600" />
           </button>
           <div>
-            <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-0.5">Tạo đơn hàng mới</h1>
+            <h1 className="text-xl md:text-2xl font-extrabold text-gray-900 mb-0.5">
+              Tạo đơn hàng mới
+            </h1>
             <p className="text-sm text-gray-500">Điền thông tin để tạo đơn hàng của bạn</p>
           </div>
         </div>
@@ -72,7 +79,9 @@ const CreateOrder: React.FC = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* User ID Selection */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Mã người dùng (UUID)</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              Mã người dùng (UUID)
+            </label>
             <div className="flex gap-1.5 mb-1.5 flex-wrap">
               {mockUserIds.map((userId, index) => (
                 <button
@@ -97,21 +106,26 @@ const CreateOrder: React.FC = () => {
 
           {/* Product Selection */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Chọn sản phẩm</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+              Chọn sản phẩm
+            </label>
             <div className="grid grid-cols-2 gap-1.5 mb-3 max-h-40 overflow-y-auto border rounded-lg p-2 bg-blue-50">
-              {mockProducts.map((product) => (
+              {mockProducts.map(product => (
                 <button
                   key={product.id}
                   type="button"
                   onClick={() => handleProductSelect(product)}
-                  className={`p-2 text-left rounded-lg border transition-colors ${selectedProduct?.id === product.id
-                    ? 'border-emerald-500 bg-emerald-50'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
+                  className={`p-2 text-left rounded-lg border transition-colors ${
+                    selectedProduct?.id === product.id
+                      ? 'border-emerald-500 bg-emerald-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
                 >
                   <div className="font-medium text-xs">{product.name}</div>
                   <div className="text-xs text-gray-500">
-                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                    {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                      product.price
+                    )}
                   </div>
                 </button>
               ))}

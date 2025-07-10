@@ -9,7 +9,6 @@ export const useConnection = () => {
   const prevOnline = useRef(browserIsOnline);
   const prevOfflineMode = useRef(isOfflineMode);
 
-  // Listen browser online/offline
   useEffect(() => {
     const updateStatus = () => setBrowserIsOnline(navigator.onLine);
     window.addEventListener('online', updateStatus);
@@ -20,12 +19,10 @@ export const useConnection = () => {
     };
   }, []);
 
-  // Reset offlineMode if browser goes offline
   useEffect(() => {
     if (!browserIsOnline) setIsOfflineMode(false);
   }, [browserIsOnline]);
 
-  // Toasts for network and offlineMode changes
   useEffect(() => {
     const onlineChanged = prevOnline.current !== browserIsOnline;
     const offlineModeChanged = prevOfflineMode.current !== isOfflineMode;
@@ -42,13 +39,10 @@ export const useConnection = () => {
     }
 
     if (offlineModeChanged && browserIsOnline) {
-      toast(
-        TOAST_MESSAGES.CONNECTION[isOfflineMode ? 'OFFLINE_MODE_ON' : 'OFFLINE_MODE_OFF'],
-        {
-          icon: isOfflineMode ? '✈️' : '🌐',
-          duration: 1000,
-        }
-      );
+      toast(TOAST_MESSAGES.CONNECTION[isOfflineMode ? 'OFFLINE_MODE_ON' : 'OFFLINE_MODE_OFF'], {
+        icon: isOfflineMode ? '✈️' : '🌐',
+        duration: 1000,
+      });
       prevOfflineMode.current = isOfflineMode;
     }
   }, [browserIsOnline, isOfflineMode]);
@@ -61,6 +55,6 @@ export const useConnection = () => {
     isOnline: browserIsOnline && !isOfflineMode,
     isOfflineMode,
     browserIsOnline,
-    toggleOfflineMode
+    toggleOfflineMode,
   };
 };

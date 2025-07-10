@@ -47,7 +47,9 @@ const OrdersDashboard: React.FC = () => {
     };
 
     return (
-      <span className={`px-3 py-1.5 rounded-full text-xs font-medium border ${statusConfig[status]}`}>
+      <span
+        className={`px-3 py-1.5 rounded-full text-xs font-medium border ${statusConfig[status]}`}
+      >
         {statusLabels[status]}
       </span>
     );
@@ -76,7 +78,10 @@ const OrdersDashboard: React.FC = () => {
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Có lỗi xảy ra</h3>
           <p className="text-gray-600 mb-4">Không thể tải dữ liệu đơn hàng</p>
-          <button onClick={() => refetch()} className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors inline-flex items-center">
+          <button
+            onClick={() => refetch()}
+            className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors inline-flex items-center"
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Thử lại
           </button>
@@ -91,10 +96,17 @@ const OrdersDashboard: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">Quản lý đơn hàng</h1>
-            <p className="text-gray-500 text-sm md:text-base">Theo dõi, tìm kiếm và thao tác với đơn hàng của bạn một cách dễ dàng.</p>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-1 tracking-tight">
+              Quản lý đơn hàng
+            </h1>
+            <p className="text-gray-500 text-sm md:text-base">
+              Theo dõi, tìm kiếm và thao tác với đơn hàng của bạn một cách dễ dàng.
+            </p>
           </div>
-          <Link to="/orders/create" className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-md hover:scale-105 transition-transform font-semibold text-sm md:text-base">
+          <Link
+            to="/orders/create"
+            className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl shadow-md hover:scale-105 transition-transform font-semibold text-sm md:text-base"
+          >
             <Plus className="h-4 w-4" />
             Tạo đơn hàng
           </Link>
@@ -103,22 +115,30 @@ const OrdersDashboard: React.FC = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
-            <div className="p-2 bg-blue-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-blue-600" /></div>
+            <div className="p-2 bg-blue-50 rounded-full mb-1.5">
+              <Package className="h-5 w-5 text-blue-600" />
+            </div>
             <p className="text-xs text-gray-500">Tổng đơn hàng</p>
             <p className="text-xl font-bold text-gray-900">{stats.total}</p>
           </div>
           <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
-            <div className="p-2 bg-amber-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-amber-600" /></div>
+            <div className="p-2 bg-amber-50 rounded-full mb-1.5">
+              <Package className="h-5 w-5 text-amber-600" />
+            </div>
             <p className="text-xs text-gray-500">Đã xác nhận</p>
             <p className="text-xl font-bold text-amber-600">{stats.confirmed}</p>
           </div>
           <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
-            <div className="p-2 bg-emerald-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-emerald-600" /></div>
+            <div className="p-2 bg-emerald-50 rounded-full mb-1.5">
+              <Package className="h-5 w-5 text-emerald-600" />
+            </div>
             <p className="text-xs text-gray-500">Đã giao</p>
             <p className="text-xl font-bold text-emerald-600">{stats.delivered}</p>
           </div>
           <div className="bg-white rounded-xl p-4 shadow border border-gray-100 flex flex-col items-center">
-            <div className="p-2 bg-rose-50 rounded-full mb-1.5"><Package className="h-5 w-5 text-rose-600" /></div>
+            <div className="p-2 bg-rose-50 rounded-full mb-1.5">
+              <Package className="h-5 w-5 text-rose-600" />
+            </div>
             <p className="text-xs text-gray-500">Đã hủy</p>
             <p className="text-xl font-bold text-rose-600">{stats.cancelled}</p>
           </div>
@@ -167,7 +187,10 @@ const OrdersDashboard: React.FC = () => {
           {isPending ? (
             <div className="p-4 flex flex-col gap-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="animate-pulse flex items-center justify-between p-4 border-b border-gray-100">
+                <div
+                  key={i}
+                  className="animate-pulse flex items-center justify-between p-4 border-b border-gray-100"
+                >
                   <div className="flex items-center space-x-3">
                     <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
                     <div>
@@ -188,8 +211,13 @@ const OrdersDashboard: React.FC = () => {
                 <Package className="h-6 w-6 text-gray-400" />
               </div>
               <h3 className="text-base font-semibold text-gray-900 mb-1.5">Chưa có đơn hàng nào</h3>
-              <p className="text-sm text-gray-600 mb-4">Bắt đầu bằng cách tạo đơn hàng đầu tiên của bạn</p>
-              <Link to="/orders/create" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors inline-flex items-center">
+              <p className="text-sm text-gray-600 mb-4">
+                Bắt đầu bằng cách tạo đơn hàng đầu tiên của bạn
+              </p>
+              <Link
+                to="/orders/create"
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors inline-flex items-center"
+              >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Tạo đơn hàng
               </Link>
@@ -197,7 +225,10 @@ const OrdersDashboard: React.FC = () => {
           ) : (
             <div className="divide-y divide-gray-100">
               {ordersResponse.data.map(order => (
-                <div key={order.id} className="p-4 hover:bg-blue-50/30 transition-colors flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                <div
+                  key={order.id}
+                  className="p-4 hover:bg-blue-50/30 transition-colors flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+                >
                   <div className="flex items-center space-x-3">
                     <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                       <Package className="h-5 w-5 text-white" />
@@ -209,7 +240,9 @@ const OrdersDashboard: React.FC = () => {
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
-                      <p className="font-semibold text-gray-900 text-base">{formatCurrency(order.amount)}</p>
+                      <p className="font-semibold text-gray-900 text-base">
+                        {formatCurrency(order.amount)}
+                      </p>
                       <p className="text-xs text-gray-600">{formatDate(order.createdAt)}</p>
                     </div>
                     {getStatusBadge(order.status)}
@@ -250,10 +283,11 @@ const OrdersDashboard: React.FC = () => {
                 return (
                   <button
                     key={page}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${page === ordersResponse.meta.currentPage
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-                      }`}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                      page === ordersResponse.meta.currentPage
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                    }`}
                     onClick={() => handlePageChange(page)}
                   >
                     {page}

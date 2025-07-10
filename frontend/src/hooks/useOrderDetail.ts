@@ -9,7 +9,7 @@ export const useOrderDetail = (id: string) => {
     queryKey: QUERY_KEYS.ORDER_DETAIL(id),
     queryFn: () => ordersApi.getOrderById(id),
     enabled: Boolean(id),
-    staleTime: 5 * 1000
+    staleTime: 5 * 1000,
   });
 };
 

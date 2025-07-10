@@ -17,8 +17,7 @@ export const useRealtimeOrders = () => {
       queryClient.setQueryData(QUERY_KEYS.ORDERS, (oldData: any) => {
         if (!oldData) return oldData;
 
-        const updateItem = (item: Order) =>
-          item.id === order.id ? order : item;
+        const updateItem = (item: Order) => (item.id === order.id ? order : item);
 
         if (Array.isArray(oldData?.data)) {
           return { ...oldData, data: oldData.data.map(updateItem) };
