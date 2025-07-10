@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class ResponseMessageInterceptor implements NestInterceptor {
-  constructor(private reflect: Reflector) { }
+  constructor(private reflect: Reflector) {}
 
   intercept(
     context: ExecutionContext,

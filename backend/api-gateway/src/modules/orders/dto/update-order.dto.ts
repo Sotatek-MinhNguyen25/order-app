@@ -1,6 +1,6 @@
 import { IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderStatus } from 'src/orders/order.enum';
+import { OrderStatus } from 'src/modules/orders/order.enum';
 
 export class UpdateOrderDto {
   @ApiProperty({ enum: OrderStatus, default: OrderStatus.CREATED })

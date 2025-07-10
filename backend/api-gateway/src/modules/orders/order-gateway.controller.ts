@@ -9,22 +9,22 @@ import {
   Query,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
-import { UpdateOrderDto } from 'src/orders/dto/update-order.dto';
-import { GetListDto } from 'src/orders/dto/get-list.dto';
+import { CreateOrderDto } from 'src/modules/orders/dto/create-order.dto';
+import { UpdateOrderDto } from 'src/modules/orders/dto/update-order.dto';
+import { GetListDto } from 'src/modules/orders/dto/get-list.dto';
 import { firstValueFrom } from 'rxjs';
-import { GATEWAY_CONSTANTS } from './constants/order.constant';
+import { GATEWAY_CONSTANTS } from '../../constants/order.constant';
 import { config } from 'src/configs/config.service';
 
 @Controller('orders')
 export class OrderGatewayController {
   constructor(
     @Inject(config.ORDER_SERVICE) private readonly orderClient: ClientProxy,
-  ) {}
+  ) { }
 
   @Post()
   async createOrder(@Body() dto: CreateOrderDto) {
-    return firstValueFrom(
+    return await firstValueFrom(
       this.orderClient.send(
         GATEWAY_CONSTANTS.GATEWAY.CONTROLLER.ORDER_CREATE,
         dto,
@@ -34,7 +34,7 @@ export class OrderGatewayController {
 
   @Post(':id/retry-payment')
   async retryPayment(@Param('id') id: string) {
-    return firstValueFrom(
+    return await firstValueFrom(
       this.orderClient.send(
         GATEWAY_CONSTANTS.GATEWAY.CONTROLLER.ORDER_RETRY_PAYMENT,
         { id },
@@ -44,7 +44,7 @@ export class OrderGatewayController {
 
   @Patch(':orderId')
   async updateOrder(@Param('orderId') id: string, @Body() dto: UpdateOrderDto) {
-    return firstValueFrom(
+    return await firstValueFrom(
       this.orderClient.send(GATEWAY_CONSTANTS.GATEWAY.CONTROLLER.ORDER_UPDATE, {
         id,
         dto,
@@ -54,7 +54,7 @@ export class OrderGatewayController {
 
   @Get()
   async getAllOrders(@Query() query: GetListDto) {
-    return firstValueFrom(
+    return await firstValueFrom(
       this.orderClient.send(
         GATEWAY_CONSTANTS.GATEWAY.CONTROLLER.ORDER_GET_ALL,
         query,
@@ -64,7 +64,7 @@ export class OrderGatewayController {
 
   @Get(':orderId')
   async getOrderById(@Param('orderId') id: string) {
-    return firstValueFrom(
+    return await firstValueFrom(
       this.orderClient.send(
         GATEWAY_CONSTANTS.GATEWAY.CONTROLLER.ORDER_GET_BY_ID,
         { orderId: id },

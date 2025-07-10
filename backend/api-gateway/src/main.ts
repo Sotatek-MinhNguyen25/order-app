@@ -3,11 +3,10 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionInterceptor } from './interceptor/http-exception.interceptor';
 import * as morgan from 'morgan';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { config } from './configs/config.service';
-import { ResponseMessageInterceptor } from './interceptor/response.interceptor';
+import { ResponseMessageInterceptor } from './common/interceptor/response.interceptor';
 
 dotenv.config();
 

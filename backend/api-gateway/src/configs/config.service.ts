@@ -31,6 +31,14 @@ export class ConfigService {
     10,
   );
 
+  readonly AUTH_SERVICE = process.env.AUTH_SERVICE || 'AUTH_SERVICE';
+  readonly AUTH_HOST = process.env.AUTH_HOST || this.DEFAULT_HOST;
+  readonly AUTH_PORT = parseInt(process.env.AUTH_PORT || '8004', 10);
+
+  JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-in-production';
+  AC_TOKEN_EXPIRED = process.env.AC_TOKEN_EXPIRED || '3d';
+  RF_TOKEN_EXPIRED = process.env.RF_TOKEN_EXPIRED || '7d';
+
   // Other shared configs (optional)
   readonly ENV = process.env.NODE_ENV || 'development';
 }
