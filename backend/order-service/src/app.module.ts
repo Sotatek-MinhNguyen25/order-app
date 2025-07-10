@@ -32,4 +32,4 @@ import { RedisModule } from "./database/redis/redis.module";
     }
   ]
 })
-export class AppModule { }
+export class AppModule {}

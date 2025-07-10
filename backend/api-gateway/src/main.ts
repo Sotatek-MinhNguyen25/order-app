@@ -3,9 +3,12 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ValidatorConstraint } from 'class-validator';
 import { HttpExceptionInterceptor } from './interceptor/http-exception.interceptor';
-import * as morgan from "morgan"
+import * as morgan from 'morgan';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { config } from './configs/config.service';
+import { ResponseMessageInterceptor } from './interceptor/response.interceptor';
+
 dotenv.config();
 
 const logger = new Logger('Bootstrap');
@@ -13,31 +16,44 @@ const logger = new Logger('Bootstrap');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT ?? 3000;
-  app.use(morgan('dev'))
+  app.use(morgan('dev'));
 
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      forbidNonWhitelisted: true
-    })
+      forbidNonWhitelisted: true,
+    }),
   );
 
-  app.enableCors({
-    origin: "*",
-    methods: ["POST", "GET", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    credentials: true
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.TCP,
+    options: {
+      host: config.HOST,
+      port: config.PORT,
+    },
   });
 
-  const config = new DocumentBuilder()
-    .setTitle("Order Service")
-    .setDescription("Order Service API description")
-    .setVersion("1.0")
-    .addTag("orders")
+  app.enableCors({
+    origin: '*',
+    methods: ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
+
+  const configSwagger = new DocumentBuilder()
+    .setTitle('Order Service')
+    .setDescription('Order Service API description')
+    .setVersion('1.0')
+    .addTag('orders')
     .build();
 
-  SwaggerModule.setup("api", app, SwaggerModule.createDocument(app, config));
-  app.useGlobalInterceptors(new HttpExceptionInterceptor())
+  SwaggerModule.setup(
+    'api',
+    app,
+    SwaggerModule.createDocument(app, configSwagger),
+  );
+  const { Reflector } = await import('@nestjs/core');
+  app.useGlobalInterceptors(new ResponseMessageInterceptor(new Reflector()));
   await app.listen(port);
   logger.log(`🚀 App is running on port: ${port}`);
 }

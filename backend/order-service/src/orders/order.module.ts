@@ -10,6 +10,7 @@ import { OrderController } from "./controllers/order.controller";
 import { OrdersMessageController } from "./controllers/order-message.controller";
 import { OrderCacheService } from "./services/order-cache.service";
 import { RedisModule } from "src/database/redis/redis.module";
+import { OrderEventController } from "./controllers/order-event.controller";
 
 @Module({
   imports: [
@@ -18,8 +19,8 @@ import { RedisModule } from "src/database/redis/redis.module";
     CacheApiModule,
     RedisModule
   ],
-  controllers: [OrderController, OrdersMessageController],
+  controllers: [OrderController, OrdersMessageController, OrderEventController],
   providers: [OrderService, OrdersGateway, OrderCacheService],
   exports: [OrderService, OrdersGateway, OrderCacheService]
 })
-export class OrderModule { }
+export class OrderModule {}

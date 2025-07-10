@@ -1,11 +1,11 @@
-import { ApiPropertyOptional } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsOptional, IsString, IsNumber, Min, IsEnum } from "class-validator";
-import { OrderStatus } from "src/orders/order.enum";
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsNumber, Min, IsEnum } from 'class-validator';
+import { OrderStatus } from 'src/orders/order.enum';
 
 export enum SortOrder {
-  ASC = "ASC",
-  DESC = "DESC"
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 export class GetListDto {
@@ -18,7 +18,7 @@ export class GetListDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page: number = 1
+  page: number = 1;
 
   @ApiPropertyOptional({ default: 10, minimum: 1 })
   @Type(() => Number)
@@ -26,7 +26,7 @@ export class GetListDto {
   @Min(1)
   limit: number = 10;
 
-  @ApiPropertyOptional({ example: "createdAt" })
+  @ApiPropertyOptional({ example: 'createdAt' })
   @IsOptional()
   @IsString()
   sortBy?: string;

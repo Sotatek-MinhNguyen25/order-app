@@ -37,7 +37,7 @@ export const ORDER_CONSTANTS = {
     ORDER_UPDATED: "orderUpdated"
   },
 
-  MICROSERVICE: {
+  GATEWAY: {
     CONTROLLER: {
       ORDER_CREATE: "order.create",
       ORDER_RETRY_PAYMENT: "order.retry_payment",
