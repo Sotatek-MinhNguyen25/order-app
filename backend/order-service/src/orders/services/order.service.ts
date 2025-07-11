@@ -16,6 +16,7 @@ import { OrdersGateway } from "./orders.gateway";
 import { firstValueFrom } from "rxjs";
 import { GenerateKeyCacheHelper } from "../helpers/generate-key-cache.helper";
 import { OrderCacheService } from "./order-cache.service";
+import { GetListWithUserDto } from "../dto/get-list-with-user.dto";
 
 @Injectable()
 export class OrderService {
@@ -184,34 +185,39 @@ export class OrderService {
     return { data: order };
   }
 
-  async getAllOrders(dto: GetListDto): Promise<PaginatedOrderResponse> {
+  async getAllOrders(dto: GetListWithUserDto): Promise<PaginatedOrderResponse> {
     const key = GenerateKeyCacheHelper(dto);
+
     const foundCache = await this.orderCache.getOrderList(dto);
     if (foundCache) {
       this.logger.log(`Cache hit with keys : ${key}`);
       return foundCache;
     }
 
-    const query = await this.orderRepository.createQueryBuilder("order");
+    const query = this.orderRepository.createQueryBuilder("order");
+
+    // query.where("order.userId = :userId", { userId: dto.userId });
 
     if (dto.search) {
-      query.where("order.productName LIKE :search", {
-        search: `%${dto.search}%`
+      query.andWhere("order.productName LIKE :search", {
+        search: `%${dto.search}%`,
       });
     }
 
     if (dto.status) {
-      query.andWhere("order.status = :status", { status: `${dto.status}` });
+      query.andWhere("order.status = :status", { status: dto.status });
     }
 
     query.orderBy(`order.${dto.sortBy}`, dto.sortOrder);
 
     const result = await paginate(query, dto.page, dto.limit);
+
     await this.orderCache.setOrderList(dto, result);
     this.logger.log(`Cache SET - List Key: ${key}`);
 
     return result;
   }
+
 
   private emitOrderCreated(order: OrderEntity) {
     this.clientOrder.emit(ORDER_CONSTANTS.EVENTS.ORDER_CREATED, {

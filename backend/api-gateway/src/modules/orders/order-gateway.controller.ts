@@ -15,6 +15,8 @@ import { GetListDto } from 'src/modules/orders/dto/get-list.dto';
 import { firstValueFrom } from 'rxjs';
 import { GATEWAY_CONSTANTS } from '../../constants/order.constant';
 import { config } from 'src/configs/config.service';
+import { IUser } from '../auth/user.interface';
+import { AuthUser } from 'src/common/decorator/auth-user.decorator';
 
 @Controller('orders')
 export class OrderGatewayController {
@@ -53,11 +55,17 @@ export class OrderGatewayController {
   }
 
   @Get()
-  async getAllOrders(@Query() query: GetListDto) {
+  async getAllOrders(
+    @Query() query: GetListDto,
+    @AuthUser() user: IUser
+  ) {
+    console.log(user)
+    const queryWithUser = { ...query, userId: user.userId };
+
     return await firstValueFrom(
       this.orderClient.send(
         GATEWAY_CONSTANTS.GATEWAY.CONTROLLER.ORDER_GET_ALL,
-        query,
+        queryWithUser,
       ),
     );
   }

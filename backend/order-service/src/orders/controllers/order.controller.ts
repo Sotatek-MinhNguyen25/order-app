@@ -16,7 +16,7 @@ import { GetListDto } from "../dto/get-list.dto";
 
 @Controller("/orders")
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   @ResponseMessage("Create order success")
@@ -39,11 +39,11 @@ export class OrderController {
     return await this.orderService.updateOrder(orderId, dto.status);
   }
 
-  @Get("")
-  @ResponseMessage("Get list order success")
-  async getAllOrders(@Query() dto: GetListDto) {
-    return await this.orderService.getAllOrders(dto);
-  }
+  // @Get("")
+  // @ResponseMessage("Get list order success")
+  // async getAllOrders(@Query() dto: GetListDto) {
+  //   return await this.orderService.getAllOrders(dto);
+  // }
 
   @Get("/:orderId")
   @ResponseMessage("Get order detail success")

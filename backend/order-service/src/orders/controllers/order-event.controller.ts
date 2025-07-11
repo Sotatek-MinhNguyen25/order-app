@@ -31,10 +31,11 @@ export class OrderEventController {
   }
 
   @MessagePattern(ORDER_CONSTANTS.GATEWAY.CONTROLLER.ORDER_GET_ALL)
-  async getAllOrders(@Payload() dto: GetListDto) {
+  async getAllOrders(@Payload() payload: any) {
     this.logger.log('ORDER_GET_ALL');
-    return this.orderService.getAllOrders(dto);
+    return this.orderService.getAllOrders(payload);
   }
+
 
   @MessagePattern(ORDER_CONSTANTS.GATEWAY.CONTROLLER.ORDER_GET_BY_ID)
   async getOrderById(@Payload() data: { orderId: string }) {
