@@ -1,56 +1,181 @@
 version: '3.8'
 
 services:
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT:-8000}
+      - HOST=${HOST:-127.0.0.1}
+      - API_PREFIX=${API_PREFIX:-api/v1}
+      - ORDER_SERVICE=${ORDER_SERVICE}
+      - ORDER_HOST=order-service
+      - ORDER_PORT=${ORDER_PORT:-8001}
+      - PAYMENT_SERVICE=${PAYMENT_SERVICE}
+      - PAYMENT_HOST=payment-service
+      - PAYMENT_PORT=${PAYMENT_PORT:-8002}
+      - NOTIFICATION_SERVICE=${NOTIFICATION_SERVICE}
+      - NOTIFICATION_HOST=notification-service
+      - NOTIFICATION_PORT=${NOTIFICATION_PORT:-8003}
+      - AUTH_SERVICE=${AUTH_SERVICE}
+      - AUTH_HOST=auth-service
+      - AUTH_PORT=${AUTH_PORT:-8004}
+      - JWT_SECRET=${JWT_SECRET}
+      - AC_TOKEN_EXPIRED=${AC_TOKEN_EXPIRED:-3d}
+      - RF_TOKEN_EXPIRED=${RF_TOKEN_EXPIRED:-7d}
+    depends_on:
+      - order-service
+      - payment-service
+      - notification-service
+      - auth-service
+    networks:
+      - app-network
+
+  # Auth Service
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "${AUTH_PORT:-8004}:${AUTH_PORT:-8004}"
+    env_file:
+      - .env
+    environment:
+      - PORT=${AUTH_PORT:-8004}
+      - HOST=${HOST:-127.0.0.1}
+      - DB_HOST=postgres
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-auth_service}
+      - JWT_SECRET=${JWT_SECRET}
+      - AC_TOKEN_EXPIRED=${AC_TOKEN_EXPIRED:-3d}
+      - RF_TOKEN_EXPIRED=${RF_TOKEN_EXPIRED:-7d}
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - app-network
+
+  # Order Service
   order-service:
     build: ./order-service
     ports:
-      - "8001:8001"
+      - "${ORDER_PORT:-8001}:${ORDER_PORT:-8001}"
+    env_file:
+      - .env
     environment:
-      - PORT=8001
-      - DATABASE_URL=postgres://root:password@host.docker.internal:5432/orders
-      - PAYMENT_SERVICE_URL=http://payment-service:8002
-      - RABBITMQ_URL=amqp://root:password@rabbitmq:5672
-      - RABBITMQ_PAYMENT_QUEUE=payment_queue
-      - RABBITMQ_MAIL_QUEUE=mail_queue
-      - DEFAULT_EMAIL_RECIPIENT=nguyenquangminh15092003@gmail.com
-      - DEFAULT_PAYMENT_TOKEN=secure_payment_token
+      - PORT=${ORDER_PORT:-8001}
+      - HOST=${HOST:-127.0.0.1}
+      - DB_HOST=postgres
+      - DB_PORT=${ORDER_DB_PORT:-5432}
+      - DB_USER=${ORDER_DB_USER:-postgres}
+      - DB_PASSWORD=${ORDER_DB_PASSWORD:-password}
+      - DB_NAME=${ORDER_DB_NAME:-order_service}
+      - RABBITMQ_URI=${RABBITMQ_URI}
+      - RABBITMQ_ORDER_QUEUE=${RABBITMQ_ORDER_QUEUE:-order_queue}
+      - RABBIT_PAYMENT_QUEUE=${RABBITMQ_PAYMENT_QUEUE:-payment_queue}
+      - RABBIT_MAIL_QUEUE=${RABBITMQ_MAIL_QUEUE:-mail_queue}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT:-6379}
     depends_on:
+      - postgres
       - rabbitmq
+      - redis
+    networks:
+      - app-network
 
+  # Payment Service
   payment-service:
     build: ./payment-service
     ports:
-      - "8002:8002"
+      - "${PAYMENT_PORT:-8002}:${PAYMENT_PORT:-8002}"
+    env_file:
+      - .env
     environment:
-      - PORT=8002
-      - RABBITMQ_URL=amqp://root:password@rabbitmq:5672
-      - RABBITMQ_PAYMENT_QUEUE=payment_queue
-      - RABBITMQ_ORDER_QUEUE=order_queue
+      - PORT=${PAYMENT_PORT:-8002}
+      - HOST=${HOST:-127.0.0.1}
+      - RABBITMQ_URI=${RABBITMQ_URI}
+      - RABBITMQ_PAYMENT_QUEUE=${RABBITMQ_PAYMENT_QUEUE:-payment_queue}
+      - RABBITMQ_ORDER_QUEUE=${RABBITMQ_ORDER_QUEUE:-order_queue}
     depends_on:
       - rabbitmq
+    networks:
+      - app-network
 
+  # Notification Service
   notification-service:
     build: ./notification-service
     ports:
-      - "8003:8003"
+      - "${NOTIFICATION_PORT:-8003}:${NOTIFICATION_PORT:-8003}"
+    env_file:
+      - .env
     environment:
-      - PORT=8003
-      - RABBITMQ_URL=amqp://root:password@rabbitmq:5672
-      - RABBITMQ_MAIL_QUEUE=mail_queue
-      - SMTP_HOST=smtp.gmail.com
-      - SMTP_PORT=587
+      - PORT=${NOTIFICATION_PORT:-8003}
+      - HOST=${HOST:-127.0.0.1}
+      - RABBITMQ_URL=${RABBITMQ_URL}
+      - RABBITMQ_MAIL_QUEUE=${RABBITMQ_MAIL_QUEUE:-mail_queue}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-465}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_FROM_EMAIL=noreply@orderservice.com
-      - SMTP_FROM_NAME=Order Service
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
     depends_on:
       - rabbitmq
+    networks:
+      - app-network
 
-  rabbitmq:
-    image: rabbitmq:3-management
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
     ports:
-      - "5672:5672"
-      - "15672:15672" # UI
+      - "5432:5432"
+    env_file:
+      - .env
     environment:
-      RABBITMQ_DEFAULT_USER: root
-      RABBITMQ_DEFAULT_PASS: password
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - POSTGRES_MULTIPLE_DATABASES=${POSTGRES_MULTIPLE_DATABASES}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-multiple-db.sh:/docker-entrypoint-initdb.d/init-multiple-db.sh
+    networks:
+      - app-network
+
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.10-management
+    ports:
+      - "5672:5672"   # AMQP protocol port
+      - "15672:15672" # Management UI port
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER:-root}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS:-password}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+  # Redis for Caching
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  redis_data:
